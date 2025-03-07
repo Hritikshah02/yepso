@@ -9,9 +9,9 @@ import Image from 'next/image';
 
 const ProductPage = () => {
   const images = [
-    "/Static/Crousal/product/crousal2.png",
-    "/Static/Crousal/product/crousal2.png",
-    "/Static/Crousal/product/crousal2.png",
+    "/Static/Crousal/product/Landing Page Banner 2.png",
+    "/Static/Crousal/product/Landing Page Banner 2.png",
+    "/Static/Crousal/product/Landing Page Banner 2.png",
   ];
 
   return (

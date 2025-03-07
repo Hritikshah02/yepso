@@ -11,9 +11,9 @@ import Image from 'next/image';
 
 const HomePage = () => {
   const images = [
-    "/Static/Crousal/landing/yepso1.png",
-    "/Static/Crousal/landing/yepso2.png",
-    "/Static/Crousal/landing/yepso3.png",
+    "/Static/Crousal/landing/Landing Page Banner1.png",
+    "/Static/Crousal/landing/Landing Page Banner1.png",
+    "/Static/Crousal/landing/Landing Page Banner1.png",
   ];
 
   return (
