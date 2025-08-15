@@ -1,0 +1,135 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  // Using a fixed file path to avoid needing .env setup
+  url      = "file:./dev.db"
+}
+
+model Product {
+  id         Int        @id @default(autoincrement())
+  slug       String     @unique
+  name       String
+  price      Int
+  imageUrl   String?
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  cartItems  CartItem[]
+}
+
+model Cart {
+  id         String     @id
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  items      CartItem[]
+}
+
+model CartItem {
+  id         Int       @id @default(autoincrement())
+  cartId     String
+  productId  Int
+  quantity   Int       @default(1)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  cart       Cart      @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product    Product   @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@unique([cartId, productId])
+}
+
+/// Checkout models
+enum OrderStatus {
+  pending
+  paid
+  failed
+  cod_pending
+  cancelled
+}
+
+enum AddressType {
+  shipping
+  billing
+}
+
+enum PaymentProvider {
+  razorpay
+  cod
+}
+
+enum PaymentStatus {
+  created
+  authorized
+  paid
+  failed
+}
+
+model Order {
+  id         String        @id @default(cuid())
+  cartId     String?
+  userId     String?
+  status     OrderStatus   @default(pending)
+  email      String?
+  subtotal   Int
+  shipping   Int           @default(0)
+  tax        Int           @default(0)
+  total      Int
+  currency   String        @default("INR")
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  items      OrderItem[]
+  addresses  Address[]
+  payments   Payment[]
+}
+
+model OrderItem {
+  id         Int       @id @default(autoincrement())
+  orderId    String
+  productId  Int
+  name       String
+  price      Int
+  quantity   Int
+  imageUrl   String?
+
+  order      Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product    Product   @relation(fields: [productId], references: [id])
+}
+
+model Address {
+  id          Int          @id @default(autoincrement())
+  orderId     String
+  type        AddressType
+  name        String
+  phone       String
+  line1       String
+  line2       String?
+  city        String
+  state       String
+  postalCode  String
+  country     String       @default("IN")
+
+  order       Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+model Payment {
+  id               String          @id @default(cuid())
+  orderId          String
+  provider         PaymentProvider
+  providerOrderId  String?
+  providerPaymentId String?
+  amount           Int
+  status           PaymentStatus
+  raw              Json?
+  createdAt        DateTime        @default(now())
+
+  order            Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([providerOrderId])
+}

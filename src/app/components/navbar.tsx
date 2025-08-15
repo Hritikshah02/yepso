@@ -4,10 +4,12 @@ import { Menu, X, Search, User, ShoppingBag } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import Logo from "../../../public/Static/Logo/image.png"
+import { useCart } from '../context/CartContext';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const { count } = useCart();
 
   // Handle scroll event to add/remove the scrolled class
   useEffect(() => {
@@ -52,9 +54,16 @@ export default function Navbar() {
           </div>
 
           {/* Icons */}
-          <div className="flex space-x-4">
+          <div className="flex space-x-4 items-center">
             <User className="text-black cursor-pointer" />
-            <ShoppingBag className="text-black cursor-pointer" />
+            <Link href="/cart" className="relative">
+              <ShoppingBag className="text-black cursor-pointer" />
+              {count > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full px-1 min-w-5 text-center">
+                  {count}
+                </span>
+              )}
+            </Link>
           </div>
         </div>
 
@@ -84,9 +93,16 @@ export default function Navbar() {
           </div>
 
           {/* Icons */}
-          <div className="flex space-x-4">
+          <div className="flex space-x-4 items-center">
             <User className="text-black cursor-pointer" />
-            <ShoppingBag className="text-black cursor-pointer" />
+            <Link href="/cart" className="relative">
+              <ShoppingBag className="text-black cursor-pointer" />
+              {count > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full px-1 min-w-5 text-center">
+                  {count}
+                </span>
+              )}
+            </Link>
           </div>
         </div>
       )}

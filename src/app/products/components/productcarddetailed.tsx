@@ -1,8 +1,16 @@
+"use client";
 import Image from "next/image";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { useCart } from "../../context/CartContext";
 import "@fortawesome/fontawesome-free/css/all.min.css"; // Import Font Awesome
+import QuantityControls from "./QuantityControls";
 
-const ProductCardDetailed = ({ image, hoverImage, discount, title, reviews, price, timer }) => {
+type Props = { image: string; hoverImage?: string; discount?: string; title: string; reviews: string; price: string; timer: string }
+
+const ProductCardDetailed = ({ image, hoverImage, discount, title, reviews, price, timer }: Props) => {
+  const { addToCart, updateQuantity, items } = useCart();
+  const toSlug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+  const slug = useMemo(() => toSlug(title), [title])
   return (
     <div className="group relative shadow-lg mx-auto max-w-[394px] max-h-[447px] gap-5">
       <div className="relative bg-[#EDEDED]">
@@ -44,13 +52,10 @@ const ProductCardDetailed = ({ image, hoverImage, discount, title, reviews, pric
             <i className="fa-solid fa-eye absolute opacity-0 group-hover/button:opacity-100 transition-opacity duration-200"></i>
           </button>
 
-          {/* Add to Cart Button */}
-          <button className="relative flex items-center justify-center w-40 h-10 bg-white text-black rounded-full mx-2 mt-2 transition-all duration-300 hover:bg-gray-800 hover:text-white group/button">
-            <span className="group-hover/button:opacity-0 transition-opacity duration-200">
-              Add to Cart
-            </span>
-            <i className="fa-solid fa-cart-shopping absolute opacity-0 group-hover/button:opacity-100 transition-opacity duration-200"></i>
-          </button>
+          {/* Add to Cart / Quantity Controls */}
+          <div className="relative flex items-center justify-center mx-2 mt-2">
+            <QuantityControls slug={slug} title={title} />
+          </div>
         </div>
       </div>
 

@@ -1,70 +1,58 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import gsap from "gsap";
 import Image from "next/image";
-import parse from "html-react-parser";
+
+type CatalogCard = {
+  id: string | number;
+  card_title: string;
+  card_image?: string | null;
+  product_image?: string | null;
+  apiIndex: number;
+};
 
 const fetchDataFromApis = async () => {
-  const urls = [
-    'http://127.0.0.1:8000/catalog/catalogs_new_drops/',
-    'http://127.0.0.1:8000/catalog/catalogs_inveter/',
-    'http://127.0.0.1:8000/catalog/catalogs_aio_lithium/',
-    'http://127.0.0.1:8000/catalog/catalogs_ac_stabalizer/',
-  ];
-
-  const responses = await Promise.all(urls.map((url) => fetch(url)));
-  const data = await Promise.all(responses.map((response) => response.json()));
-  return data.map((catalog, index) => catalog.map((item) => ({ ...item, apiIndex: index })));
+  try {
+    const res = await fetch('/api/catalogs', { cache: 'no-store' });
+    if (!res.ok) {
+      console.error('Catalog proxy failed', res.status);
+      return [] as any[];
+    }
+    const json = await res.json();
+    // API returns { catalogs: Array<Array<Item & { apiIndex:number }>> }
+    return (json?.catalogs ?? []) as any[];
+  } catch (err) {
+    console.error('Failed to fetch catalogs', err);
+    return [] as any[];
+  }
 };
 
 export default function ScrollCards() {
-  const containerRef = useRef(null);
-  const wrapperRef = useRef(null);
-  const cardRefs = useRef([]);
-  const [scrollX, setScrollX] = useState(0);
-  const [touchStartX, setTouchStartX] = useState(0);
-  const [allCards, setAllCards] = useState([]);
-  const [activeApiIndex, setActiveApiIndex] = useState(0);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const cardRefs = useRef<HTMLDivElement[]>([]);
+  const [allCards, setAllCards] = useState<CatalogCard[]>([]);
+  const [activeApiIndex, setActiveApiIndex] = useState<number>(0);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const getData = async () => {
-      const catalogs = await fetchDataFromApis();
-      const allCards = catalogs.flat();
+      const catalogs = (await fetchDataFromApis()) as any[];
+      const allCards = Array.isArray(catalogs) ? (catalogs.flat() as CatalogCard[]) : [];
       setAllCards(allCards);
+      setLoading(false);
     };
     getData();
   }, []);
 
-  useEffect(() => {
-    if (!containerRef.current || !wrapperRef.current) return;
-
-    const container = containerRef.current;
-
-    const handleWheelScroll = (event) => {
-      event.preventDefault();
-      const totalWidth = wrapperRef.current.scrollWidth - container.clientWidth;
-      const moveDistance = event.deltaY;
-      const newPos = Math.min(Math.max(0, scrollX + moveDistance), totalWidth);
-      setScrollX(newPos);
-
-      gsap.to(wrapperRef.current, {
-        x: -newPos,
-        ease: "power2.out",
-        duration: 0.5,
-        overwrite: "auto",
-      });
-    };
-
-    container.addEventListener("wheel", handleWheelScroll, { passive: false });
-    return () => container.removeEventListener("wheel", handleWheelScroll);
-  }, [scrollX]);
+  // Use native horizontal scroll; no transform-based scrolling
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            setActiveApiIndex(parseInt(entry.target.dataset.apiIndex));
+            const el = entry.target as HTMLElement;
+            const idx = parseInt(el.dataset.apiIndex || "0", 10);
+            setActiveApiIndex(isNaN(idx) ? 0 : idx);
           }
         });
       },
@@ -76,27 +64,22 @@ export default function ScrollCards() {
     return () => cardsElements.forEach((card) => observer.unobserve(card));
   }, [allCards]);
 
-  const handleScrollToCategory = (index) => {
-    const cardElement = cardRefs.current.find(
-      (card) => card.dataset.apiIndex == index
-    );
-    if (cardElement && wrapperRef.current) {
-      const containerWidth = containerRef.current.clientWidth;
+  const handleScrollToCategory = (index: number) => {
+    const cardElement = cardRefs.current.find((card: HTMLDivElement) => card?.dataset?.apiIndex == String(index));
+    const container = containerRef.current;
+    if (cardElement && container) {
+      const containerWidth = container.clientWidth;
       const cardLeftOffset = cardElement.offsetLeft;
-      const scrollPosition = Math.max(0, cardLeftOffset - containerWidth / 2 + cardElement.clientWidth / 2);
-      gsap.to(wrapperRef.current, {
-        x: -scrollPosition,
-        ease: "power2.out",
-        duration: 0.8,
-      });
-      setActiveApiIndex(index); // Update the active API index when the button is clicked
+      const scrollLeft = Math.max(0, cardLeftOffset - containerWidth / 2 + cardElement.clientWidth / 2);
+      container.scrollTo({ left: scrollLeft, behavior: "smooth" });
+      setActiveApiIndex(index);
     }
   };
 
   return (
-    <main className="h-full flex items-center justify-center py-10 px-20 flex-col w-full lg:translate-x-10">
-      <div className="flex flex-row justify-start items-center whitespace-nowrap overflow-x-hidden w-full lg:p-10 lg:gap-20 sm:gap-4">
-        {["New Drops", "Inveter", "AIO Lithium", "AC Stabilizer"].map((label, index) => (
+    <main className="w-screen max-w-none h-full flex items-center justify-center py-8 px-0 flex-col">
+      <div className="flex flex-row justify-start items-center whitespace-nowrap overflow-x-auto w-full px-4 lg:px-8 gap-6">
+        {["New Drops", "Inverter", "AIO Lithium", "AC Stabiliser"].map((label, index) => (
           <button
             key={index}
             onClick={() => handleScrollToCategory(index)}
@@ -111,14 +94,20 @@ export default function ScrollCards() {
         ))}
       </div>
 
-      <div ref={containerRef} className="relative w-full overflow-hidden">
-        <div ref={wrapperRef} className="flex gap-6 w-max py-8 px-6">
-          {allCards.map((card, index) => (
+      <div ref={containerRef} className="relative w-full overflow-x-auto scroll-smooth">
+        <div className="flex gap-6 w-max py-8 px-6">
+          {loading && (
+            <div className="text-gray-500">Loading catalogs…</div>
+          )}
+          {!loading && allCards.length === 0 && (
+            <div className="text-gray-600">No items found. Check the <a className="underline" href="/api/catalogs">/api/catalogs</a> response and backend endpoints.</div>
+          )}
+          {!loading && allCards.length > 0 && allCards.map((card, index) => (
             <div
               key={`${card.id}-${card.card_title}-${index}`}
               data-api-index={card.apiIndex}
               className="relative w-[400px] h-[300px] rounded-xl bg-red-50 shadow-lg overflow-hidden group card lg:gap-10"
-              ref={(el) => (cardRefs.current[index] = el)}
+              ref={(el) => { if (el) cardRefs.current[index] = el; }}
             >
               {/* Main Image: Render only if a valid URL exists */}
               <div className="relative w-full h-full">
@@ -126,9 +115,9 @@ export default function ScrollCards() {
                   <Image
                     src={card.card_image}
                     alt={card.card_title}
-                    layout="fill"
-                    objectFit="cover"
-                    className="rounded-xl"
+                    fill
+                    className="rounded-xl object-cover"
+                    sizes="(max-width: 768px) 100vw, 400px"
                   />
                 ) : null}
               </div>
@@ -137,11 +126,11 @@ export default function ScrollCards() {
               {card.product_image && (
                 <div className="absolute bottom-3 right-3 w-20 h-14">
                   <Image
-                    src={card.product_image}
+                    src={card.product_image || ""}
                     alt="Product"
                     width={80}
                     height={56}
-                    className="rounded-md shadow-md"
+                    className="rounded-md shadow-md object-contain"
                   />
                 </div>
               )}

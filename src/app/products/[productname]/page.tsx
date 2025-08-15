@@ -5,7 +5,9 @@ import Navbar from '../../components/navbar';
 import Footer from '../../components/footer';
 import ProductCardDetailed from "../components/productcarddetailed";
 import { useState } from 'react';
+import { useCart } from '../../context/CartContext';
 import { Swiper, SwiperSlide } from 'swiper/react';
+import type { Swiper as SwiperType } from 'swiper';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
@@ -71,13 +73,16 @@ const product = {
   },
 };
 
+type ProductTabs = keyof typeof product.tabs;
+
 export default function ProductPage() {
-  const [activeTab, setActiveTab] = useState('Description');
-  const [swiperRef, setSwiperRef] = useState(null);
+  const [activeTab, setActiveTab] = useState<ProductTabs>('Description');
+  const [swiperRef, setSwiperRef] = useState<SwiperType | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [liked, setLiked] = useState(false);
+  const { addToCart } = useCart();
 
-  const handleQuantityChange = (type) => {
+  const handleQuantityChange = (type: 'increment' | 'decrement') => {
     if (type === 'increment') {
       setQuantity(quantity + 1);
     } else if (type === 'decrement' && quantity > 1) {
@@ -123,7 +128,7 @@ export default function ProductPage() {
             {product.images.map((img, index) => (
               <button
                 key={index}
-                onClick={() => swiperRef?.slideTo(index)}
+                 onClick={() => swiperRef?.slideTo(index)}
                 className={`flex border rounded-lg overflow-hidden h-24 w-24`}
               >
                 <img src={img} alt={`Thumbnail ${index + 1}`} className="h-24 w-24 object-cover" />
@@ -176,7 +181,23 @@ export default function ProductPage() {
             </div>
 
             {/* Add to Cart Button */}
-            <button className="bg-black text-white px-[20px] py-[8px] rounded-xl">Add to Cart</button>
+            <button
+              onClick={async () => {
+                try {
+                  const res = await fetch('/api/products')
+                  const products = await res.json()
+                  const toSlug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+                  const targetSlug = toSlug(product.name)
+                  const match = products.find((p: any) => p.slug === targetSlug) ?? products[0]
+                  if (match?.id) await addToCart(match.id, quantity)
+                } catch (e) {
+                  console.error(e)
+                }
+              }}
+              className="bg-black text-white px-[20px] py-[8px] rounded-xl"
+            >
+              Add to Cart
+            </button>
 
             {/* Like Button */}
             <button
@@ -184,7 +205,7 @@ export default function ProductPage() {
               className={`text-xl ${liked ? 'text-red-500' : 'text-gray-400'} hover:text-red-500`}
               aria-label="Like Button"
             >
-              <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" fill={liked ? "currentColor" : "none"} className="transition-all duration-200">
+              <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" fill={liked ? "currentColor" : "none"} className="transition-all duration-200">
                 <rect x="0.5" y="0.5" width="31" height="31" rx="15.5" fill="white" />
                 <rect x="0.5" y="0.5" width="31" height="31" rx="15.5" stroke="black" />
                 <path d="M15.7916 22.875L13.5427 20.8562C12.6927 20.0889 11.9637 19.4042 11.3557 18.8021C10.7477 18.2 10.246 17.6333 9.8505 17.1021C9.45501 16.5708 9.16578 16.0573 8.98279 15.5615C8.79981 15.0656 8.70831 14.5462 8.70831 14.0031C8.70831 12.8934 9.08019 11.9696 9.82394 11.2318C10.5677 10.4939 11.4944 10.125 12.6041 10.125C13.218 10.125 13.8024 10.2549 14.3573 10.5146C14.9121 10.7743 15.3903 11.1403 15.7916 11.6125C16.193 11.1403 16.6712 10.7743 17.226 10.5146C17.7809 10.2549 18.3653 10.125 18.9791 10.125C19.9354 10.125 20.7382 10.3936 21.3875 10.9307C22.0368 11.4679 22.4795 12.1437 22.7156 12.9583H21.2104C20.9979 12.4861 20.685 12.1319 20.2719 11.8958C19.8587 11.6597 19.4278 11.5417 18.9791 11.5417C18.3771 11.5417 17.8576 11.704 17.4208 12.0286C16.984 12.3533 16.5767 12.7812 16.1989 13.3125H15.3844C15.0184 12.7812 14.6022 12.3533 14.1359 12.0286C13.6696 11.704 13.159 11.5417 12.6041 11.5417C11.9312 11.5417 11.3498 11.7748 10.8599 12.2411C10.3699 12.7075 10.125 13.2948 10.125 14.0031C10.125 14.3927 10.2076 14.7882 10.3729 15.1896C10.5382 15.591 10.8333 16.0543 11.2583 16.5797C11.6833 17.105 12.2618 17.7189 12.9937 18.4214C13.7257 19.1238 14.6583 19.9708 15.7916 20.9625C16.0986 20.691 16.4587 20.3781 16.8719 20.024C17.285 19.6698 17.6156 19.3747 17.8635 19.1385L18.0229 19.2979L18.3682 19.6432L18.7135 19.9885L18.8729 20.1479C18.6132 20.384 18.2826 20.6762 17.8812 21.0245C17.4798 21.3727 17.1257 21.6826 16.8187 21.9542L15.7916 22.875ZM20.75 20.0417V17.9167H18.625V16.5H20.75V14.375H22.1666V16.5H24.2916V17.9167H22.1666V20.0417H20.75Z" fill="black" />
@@ -207,7 +228,7 @@ export default function ProductPage() {
       {/* Tabs Section */}
       <div className="mt-[30px] max-w-[1440px] mx-auto p-[15px]">
         <div className="flex justify-center gap-[20px] border-b pb-[10px]">
-          {Object.keys(product.tabs).map((tab) => (
+          {(Object.keys(product.tabs) as ProductTabs[]).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -225,7 +246,7 @@ export default function ProductPage() {
       <h1 className='text-4xl text-center py-2 sm:text-lg md:text-2xl'>You may also Like</h1>
       <div className="flex flex-wrap justify-center gap-6 py-10">
         {productList.map((product, index) => (
-          <ProductCardDetailed key={index} {...product} />
+          <ProductCardDetailed key={index} hoverImage={undefined} {...product} />
         ))}
       </div>
 

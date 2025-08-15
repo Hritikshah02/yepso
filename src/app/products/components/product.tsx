@@ -86,7 +86,7 @@ const tabs = ["latest", "popular", "reviewed"];
 export default function App() {
   return (
     <div>
-      <ProductCatalogue tabs={tabs} products={products} useDetailedCards={true} />
+         <ProductCatalogue tabs={tabs} products={products} useDetailedCards={true} />
     </div>
   );
 }
