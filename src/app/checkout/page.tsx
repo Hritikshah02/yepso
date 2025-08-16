@@ -168,7 +168,8 @@ export default function CheckoutPage() {
         notes: razorpayOrder.notes,
         theme: { color: "#EF4444" },
         handler: function () {
-          window.location.href = "/checkout/success";
+          // Pass orderId to success page for review collection
+          window.location.href = `/checkout/success?orderId=${encodeURIComponent(orderId)}`;
         },
         modal: {
           ondismiss: function () {
@@ -197,7 +198,8 @@ export default function CheckoutPage() {
         body: JSON.stringify({ email, shipping, billing: sameAsShipping ? shipping : billing }),
       });
       if (!res.ok) throw new Error("Failed to place COD order");
-      window.location.href = "/checkout/success";
+      const { orderId } = await res.json();
+      window.location.href = `/checkout/success?orderId=${encodeURIComponent(orderId)}`;
     } catch (e: any) {
       setError(e?.message || "COD failed");
     } finally {

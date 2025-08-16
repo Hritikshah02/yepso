@@ -10,6 +10,12 @@ const nextConfig: NextConfig = {
         pathname: '/media/**', // Assuming Django serves media files from '/media/'
         search: '',
       },
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+        pathname: '/**',
+        search: '',
+      },
     ],
   },
   

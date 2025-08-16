@@ -9,7 +9,7 @@ type Props = {
 }
 
 export default function QuantityControls({ slug, title }: Props) {
-  const { items, addToCart, updateQuantity } = useCart()
+  const { items, addToCart, updateQuantity, refresh } = useCart()
   const [productId, setProductId] = useState<number | null>(null)
   const qty = useMemo(() => {
     const found = productId ? items.find(i => i.productId === productId) : undefined
@@ -68,7 +68,19 @@ export default function QuantityControls({ slug, title }: Props) {
 
   return (
     <div className="flex items-center border border-black rounded-xl bg-white px-4 h-10">
-      <button className="px-2" onClick={async () => updateQuantity(productId, Math.max(1, qty - 1))}>-</button>
+      <button
+        className="px-2"
+        onClick={async () => {
+          if (qty > 1) {
+            await updateQuantity(productId, qty - 1)
+          } else {
+            await fetch(`/api/cart?productId=${productId}`, { method: 'DELETE' })
+            await refresh()
+          }
+        }}
+      >
+        -
+      </button>
       <span className="px-3 select-none">{qty}</span>
       <button className="px-2" onClick={async () => updateQuantity(productId, qty + 1)}>+</button>
     </div>

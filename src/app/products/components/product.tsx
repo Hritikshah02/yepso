@@ -1,18 +1,21 @@
 'use client'
 import { useState } from "react";
 import ProductCardDetailed from "./productcarddetailed"; // Import the reusable component
-
+ import ProductCardCatalog from "./productcard";
+ type TabKey = "latest" | "popular" | "reviewed";
+ type Product = { image: string; hoverImage?: string; discount?: string; title: string; reviews: string; price: string; timer: string };
+ 
 // Tabs Names (Custom Names)
-const tabNames = {
+const tabNames: Record<TabKey, string> = {
   latest: "Latest Products",
   popular: "Most Popular",
   reviewed: "Most Reviewed",
 };
 
 // Tabs Component
-const Tabs = ({ tabs, selectedTab, onTabClick }) => (
+const Tabs: React.FC<{ tabs: TabKey[]; selectedTab: TabKey; onTabClick: (tab: TabKey) => void }> = ({ tabs, selectedTab, onTabClick }) => (
   <div className="flex space-x-6 text-gray-500 font-semibold text-2xl gap-5">
-    {tabs.map((tab) => (
+    {tabs.map((tab: TabKey) => (
       <span
         key={tab}
         className={`cursor-pointer ${selectedTab === tab ? "text-black border-b-2 border-black pb-1" : ""}`}
@@ -25,21 +28,21 @@ const Tabs = ({ tabs, selectedTab, onTabClick }) => (
 );
 
 // ProductCatalogue Component
-const ProductCatalogue = ({ tabs, products, useDetailedCards }) => {
-  const [selectedTab, setSelectedTab] = useState(tabs[0]); // Default to the first tab
+const ProductCatalogue: React.FC<{ tabs: TabKey[]; products: Record<TabKey, Product[]>; useDetailedCards?: boolean }> = ({ tabs, products, useDetailedCards = true }) => {
+  const [selectedTab, setSelectedTab] = useState<TabKey>(tabs[0]); // Default to the first tab
 
   // Function to handle tab click
-  const handleTabClick = (tab) => {
+  const handleTabClick = (tab: TabKey) => {
     setSelectedTab(tab);
   };
 
   // Render products based on selected tab
   const renderProducts = () => {
-    return products[selectedTab]?.map((product, index) => (
+    return products[selectedTab]?.map((product: Product, index: number) => (
       useDetailedCards ? (
         <ProductCardDetailed key={index} {...product} /> // Use the reusable ProductCardDetailed
       ) : (
-        <ProductCard key={index} image={product.image} title={product.title} />
+        <ProductCardCatalog key={index} image={product.image} title={product.title} />
       )
     ));
   };
@@ -62,26 +65,26 @@ const ProductCatalogue = ({ tabs, products, useDetailedCards }) => {
 };
 
 // Sample data (same as before)
-const products = {
+const products: Record<TabKey, Product[]> = {
   latest: [
-    { image: "/Static/Image/about2.png", discount: "-30%", title: "Smart Inverter", reviews: "4", price: "20000", timer: "255d : 45h : 44m : 52s" },
-    { image: "/Static/Image/about2.png", discount: "-20%", title: "Smart Fan", reviews: "5", price: "15000", timer: "125d : 23h : 14m : 10s" },
-    { image: "/Static/Image/about2.png", discount: "-10%", title: "LED Bulb", reviews: "3", price: "500", timer: "15d : 12h : 30m : 5s" },
+    { image: "https://res.cloudinary.com/demo/image/upload/f_auto,q_auto/sample", discount: "-30%", title: "Smart Inverter", reviews: "4", price: "20000", timer: "255d : 45h : 44m : 52s" },
+    { image: "https://res.cloudinary.com/demo/image/upload/f_auto,q_auto/sample", discount: "-20%", title: "Smart Fan", reviews: "5", price: "15000", timer: "125d : 23h : 14m : 10s" },
+    { image: "https://res.cloudinary.com/demo/image/upload/f_auto,q_auto/sample", discount: "-10%", title: "LED Bulb", reviews: "3", price: "500", timer: "15d : 12h : 30m : 5s" },
   ],
   popular: [
-    { image: "/Static/Image/about2.png", discount: "-50%", title: "Air Conditioner", reviews: "500", price: "50000", timer: "365d : 10h : 12m : 30s" },
-    { image: "/Static/Image/about2.png", discount: "-40%", title: "Washing Machine", reviews: "420", price: "30000", timer: "200d : 12h : 14m : 50s" },
-    { image: "/Static/Image/about2.png", discount: "-30%", title: "Refrigerator", reviews: "380", price: "25000", timer: "120d : 5h : 30m : 5s" },
+    { image: "https://res.cloudinary.com/demo/image/upload/f_auto,q_auto/sample", discount: "-50%", title: "Air Conditioner", reviews: "500", price: "50000", timer: "365d : 10h : 12m : 30s" },
+    { image: "https://res.cloudinary.com/demo/image/upload/f_auto,q_auto/sample", discount: "-40%", title: "Washing Machine", reviews: "420", price: "30000", timer: "200d : 12h : 14m : 50s" },
+    { image: "https://res.cloudinary.com/demo/image/upload/f_auto,q_auto/sample", discount: "-30%", title: "Refrigerator", reviews: "380", price: "25000", timer: "120d : 5h : 30m : 5s" },
   ],
   reviewed: [
-    { image: "/Static/Image/about2.png", discount: "-25%", title: "Laptop", reviews: "1000", price: "60000", timer: "45d : 18h : 30m : 15s" },
-    { image: "/Static/Image/about2.png", discount: "-15%", title: "Smartphone", reviews: "900", price: "30000", timer: "75d : 20h : 25m : 30s" },
-    { image: "/Static/Image/about2.png", discount: "-10%", title: "Smart Watch", reviews: "600", price: "12000", timer: "35d : 12h : 10m : 45s" },
+    { image: "https://res.cloudinary.com/demo/image/upload/f_auto,q_auto/sample", discount: "-25%", title: "Laptop", reviews: "1000", price: "60000", timer: "45d : 18h : 30m : 15s" },
+    { image: "https://res.cloudinary.com/demo/image/upload/f_auto,q_auto/sample", discount: "-15%", title: "Smartphone", reviews: "900", price: "30000", timer: "75d : 20h : 25m : 30s" },
+    { image: "https://res.cloudinary.com/demo/image/upload/f_auto,q_auto/sample", discount: "-10%", title: "Smart Watch", reviews: "600", price: "12000", timer: "35d : 12h : 10m : 45s" },
   ],
 };
 
 // Tabs options
-const tabs = ["latest", "popular", "reviewed"];
+const tabs: TabKey[] = ["latest", "popular", "reviewed"];
 
 export default function App() {
   return (

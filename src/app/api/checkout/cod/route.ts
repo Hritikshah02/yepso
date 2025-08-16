@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
-import { PrismaClient } from '@/generated/prisma'
+import { prisma } from '@/lib/prisma'
 
-const prisma = new PrismaClient()
 const CART_COOKIE = 'cartId'
 const USER_COOKIE = 'userId' // TODO: replace with real auth session
 
@@ -29,19 +28,20 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Missing email/shipping/billing' }, { status: 400 })
     }
 
-    const cart = await prisma.cart.findUnique({
+    const p: any = prisma as any
+    const cart = await p.cart.findUnique({
       where: { id: cartId },
       include: { items: { include: { product: true } } },
     })
     const items = cart?.items ?? []
     if (items.length === 0) return NextResponse.json({ error: 'Cart empty' }, { status: 400 })
 
-    const subtotal = items.reduce((sum, it) => sum + it.quantity * (it.product?.price ?? 0), 0)
+    const subtotal = items.reduce((sum: number, it: any) => sum + it.quantity * (it.product?.price ?? 0), 0)
     const shippingAmt = 0
     const taxAmt = 0
     const total = subtotal + shippingAmt + taxAmt
 
-    const order = await prisma.order.create({
+    const order = await p.order.create({
       data: {
         cartId,
         userId,
@@ -53,7 +53,7 @@ export async function POST(req: Request) {
         total,
         currency: 'INR',
         items: {
-          create: items.map((it) => ({
+          create: items.map((it: any) => ({
             productId: it.productId,
             name: it.product?.name ?? '',
             price: it.product?.price ?? 0,
@@ -78,7 +78,7 @@ export async function POST(req: Request) {
     })
 
     // Clear cart items after placing COD order
-    await prisma.cartItem.deleteMany({ where: { cartId } })
+    await p.cartItem.deleteMany({ where: { cartId } })
 
     return NextResponse.json({ orderId: order.id })
   } catch (e) {

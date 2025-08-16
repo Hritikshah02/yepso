@@ -133,3 +133,15 @@ model Payment {
 
   @@index([providerOrderId])
 }
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  orderId   String?
+  name      String?
+  email     String?
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+
+  order     Order?   @relation(fields: [orderId], references: [id], onDelete: SetNull)
+}

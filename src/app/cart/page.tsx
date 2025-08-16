@@ -93,7 +93,7 @@ export default function CartPage() {
                   <div key={item.id} className="flex items-center justify-between border rounded-lg p-4 bg-white">
                     <div className="flex items-center gap-4">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={item.product.imageUrl ?? '/Static/Image/about2.png'} alt={item.product.name} className="w-20 h-20 object-cover rounded" />
+                      <img src={item.product.imageUrl ?? 'https://res.cloudinary.com/demo/image/upload/f_auto,q_auto/sample'} alt={item.product.name} className="w-20 h-20 object-cover rounded" />
                       <div>
                         <div className="font-semibold">{item.product.name}</div>
                         <div className="text-gray-600">Rs {item.product.price}</div>
@@ -101,7 +101,12 @@ export default function CartPage() {
                     </div>
                     <div className="flex items-center gap-4">
                       <div className="flex items-center gap-2">
-                        <button className="px-3 py-1 border rounded" onClick={() => updateQty(item.productId, Math.max(1, item.quantity - 1))}>-</button>
+                        <button
+                          className="px-3 py-1 border rounded"
+                          onClick={() => item.quantity > 1 ? updateQty(item.productId, item.quantity - 1) : removeItem(item.productId)}
+                        >
+                          -
+                        </button>
                         <span className="min-w-6 text-center">{item.quantity}</span>
                         <button className="px-3 py-1 border rounded" onClick={() => updateQty(item.productId, item.quantity + 1)}>+</button>
                       </div>

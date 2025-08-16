@@ -1,9 +1,8 @@
 // Read cookies from Request headers and set them via NextResponse
 import { NextResponse } from 'next/server'
-import { PrismaClient } from '@/generated/prisma'
+import { prisma } from '@/lib/prisma'
 import { randomUUID } from 'crypto'
 
-const prisma = new PrismaClient()
 const CART_COOKIE = 'cartId'
 const CART_COOKIE_MAX_AGE_DAYS = 30
 
