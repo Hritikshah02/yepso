@@ -33,3 +33,45 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ slug
     )
   }
 }
+
+// Update fields (e.g., active toggle, discountPercent, description, shipping, specifications)
+export async function PATCH(req: Request, { params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params
+  const body = await req.json().catch(() => ({}))
+
+  const data: any = {}
+
+  if (typeof body?.active === 'boolean') data.active = body.active
+
+  if (body?.discountPercent !== undefined) {
+    const d = Number(body.discountPercent)
+    if (!Number.isInteger(d) || d < 0 || d > 90) {
+      return NextResponse.json({ error: 'discountPercent must be an integer between 0 and 90' }, { status: 400 })
+    }
+    data.discountPercent = d
+  }
+
+  if (typeof body?.description === 'string') data.description = body.description.trim() || null
+  if (typeof body?.shipping === 'string') data.shipping = body.shipping.trim() || null
+  if (typeof body?.specifications === 'string') data.specifications = body.specifications.trim() || null
+
+  if (body?.price !== undefined) {
+    const price = Number(body.price)
+    if (!Number.isInteger(price) || price < 0) {
+      return NextResponse.json({ error: 'Price must be a non-negative integer (in INR)' }, { status: 400 })
+    }
+    data.price = price
+  }
+
+  if (typeof body?.imageUrl === 'string') {
+    const trimmed = body.imageUrl.trim()
+    data.imageUrl = trimmed || null
+  }
+
+  try {
+    const updated = await prisma.product.update({ where: { slug }, data })
+    return NextResponse.json(updated)
+  } catch (e) {
+    return NextResponse.json({ error: 'Update failed' }, { status: 400 })
+  }
+}

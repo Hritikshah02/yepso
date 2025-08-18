@@ -4,7 +4,8 @@ import PromoBanner from '../../components/prenavbar';
 import Navbar from '../../components/navbar';
 import Footer from '../../components/footer';
 import ProductCardDetailed from "../components/productcarddetailed";
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
 import { useCart } from '../../context/CartContext';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import type { Swiper as SwiperType } from 'swiper';
@@ -20,7 +21,7 @@ const productList = [
     title: "Smart Inverter",
     reviews: "120",
     price: "20000",
-    timer: "255d : 45h : 44m : 52s",
+    timer: "255d : 45h : 44m : 10s",
   },
   {
     image: "/Static/Image/about2.png",
@@ -40,47 +41,51 @@ const productList = [
   },
 ];
 
-const product = {
-  name: 'Solar Inverter Model XYZ',
-  price: 15000,
-  originalPrice: 20000,
-  discount: 30,
-  images: [
-    '/Static/product/im1.svg',
-    '/Static/product/im2.svg',
-    '/Static/product/im3.svg',
-  ],
-  hoverImage: [
-    '/Static/product/im1.svg',
-    '/Static/product/im2.svg',
-    '/Static/product/im3.svg',
-  ],
-  
-  features: [
-    { icon: '/Static/icons/sine.png', label: 'Pure Sine Wave' },
-    { icon: '/Static/icons/MPPT.png', label: 'True MPPT' },
-    { icon: '/Static/icons/Wall.png', label: 'Wall Mount Design' },
-    { icon: '/Static/icons/Fast.png', label: 'Fast Charging' },
-    { icon: '/Static/icons/Advanced.png', label: 'Advanced DSP Technology' },
-  ],
-  tabs: {
-    Description:
-      'Inverter Pure Sine Wave delivers outstanding performance for back-up power and off-grid systems.lorem Nulla lobortis accumsan nulla sed imperdiet. Donec commodo nisl nec nibh consectetur, vel consectetur enim feugiat. Aenean iaculis cursus nibh, vel auctor mi lacinia at. Cras a ipsum dignissim, vehicula quam eu, convallis erat. Duis nec diam at purus dapibus cursus. Donec viverra gravida urna in scelerisque. Vivamus non ante at risus fermentum vulputate. In sit amet purus vitae nisl semper lobortis id sed dolor.Etiam pulvinar elit quis arcu elementum placerat. Maecenas quis imperdiet enim. Nunc iaculis mauris aliquam elit ultrices, et molestie augue placerat. Sed molestie nisi eu porta fringilla. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Vestibulum efficitur consequat erat sed aliquam. Cras rutrum ullamcorper lectus, in aliquam lectus gravida sit amet. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nullam felis lectus, venenatis ut sodales vel, congue suscipit felis. Etiam convallis odio sed turpis blandit, vitae egestas metus fringilla. Nullam accumsan eros eget dapibus faucibus.',
-    Shipping: 'Fast and secure shipping within 3-5 business days.',
-    FAQ: 'Common questions and answers about the product.',
-    Review: '4.0 (4 Reviews)',
-    Specifications: 'Input Voltage: 12V, Output: 220V, Efficiency: 95%+',
-  },
-};
+type ApiProduct = {
+  id: number
+  slug: string
+  name: string
+  price: number
+  imageUrl?: string | null
+  discountPercent?: number | null
+  description?: string | null
+  shipping?: string | null
+  specifications?: string | null
+}
 
-type ProductTabs = keyof typeof product.tabs;
+type ProductTabs = 'Description' | 'Shipping' | 'FAQ' | 'Review' | 'Specifications'
+const productTabs: ProductTabs[] = ['Description', 'Shipping', 'FAQ', 'Review', 'Specifications']
 
 export default function ProductPage() {
+  const params = useParams<{ productname: string }>()
+  const slug = decodeURIComponent((params?.productname ?? '') as string)
   const [activeTab, setActiveTab] = useState<ProductTabs>('Description');
   const [swiperRef, setSwiperRef] = useState<SwiperType | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [liked, setLiked] = useState(false);
+  const [product, setProduct] = useState<ApiProduct | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const { addToCart } = useCart();
+
+  useEffect(() => {
+    let alive = true
+    ;(async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        const res = await fetch(`/api/products/${encodeURIComponent(slug)}`, { cache: 'no-store' })
+        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+        const data: ApiProduct = await res.json()
+        if (alive) setProduct(data)
+      } catch (e: any) {
+        if (alive) setError(e?.message || 'Failed to load product')
+      } finally {
+        if (alive) setLoading(false)
+      }
+    })()
+    return () => { alive = false }
+  }, [slug])
 
   const handleQuantityChange = (type: 'increment' | 'decrement') => {
     if (type === 'increment') {
@@ -89,6 +94,32 @@ export default function ProductPage() {
       setQuantity(quantity - 1);
     }
   };
+
+  if (loading) {
+    return (
+      <>
+        <PromoBanner />
+        <Navbar />
+        <div className="w-full mx-auto p-8 text-gray-600">Loading product...</div>
+        <Footer />
+      </>
+    )
+  }
+
+  if (error || !product) {
+    return (
+      <>
+        <PromoBanner />
+        <Navbar />
+        <div className="w-full mx-auto p-8 text-red-600">{error || 'Product not found'}</div>
+        <Footer />
+      </>
+    )
+  }
+
+  const productImages = [product.imageUrl || '/next.svg', product.imageUrl || '/next.svg', product.imageUrl || '/next.svg']
+  const discount = product.discountPercent ?? 0
+  const originalPrice = discount > 0 ? Math.round(product.price / (1 - discount / 100)) : null
 
   return (
     <>
@@ -116,7 +147,7 @@ export default function ProductPage() {
             onSwiper={(swiper) => setSwiperRef(swiper)}
             className="w-full lg:aspect-video sm:aspect-auto rounded-lg overflow-hidden"
           >
-            {product.images.map((img, index) => (
+            {productImages.map((img: string, index: number) => (
               <SwiperSlide key={index}>
                 <img src={img} alt={`Product Image ${index + 1}`} className="w-full h-full object-cover" />
               </SwiperSlide>
@@ -125,10 +156,10 @@ export default function ProductPage() {
 
           {/* Thumbnail Gallery */}
           <div className="flex mt-4 gap-4 items-center justify-center flex-wrap">
-            {product.images.map((img, index) => (
+            {productImages.map((img: string, index: number) => (
               <button
                 key={index}
-                 onClick={() => swiperRef?.slideTo(index)}
+                onClick={() => swiperRef?.slideTo(index)}
                 className={`flex border rounded-lg overflow-hidden h-24 w-24`}
               >
                 <img src={img} alt={`Thumbnail ${index + 1}`} className="h-24 w-24 object-cover" />
@@ -140,9 +171,11 @@ export default function ProductPage() {
         {/* Product Info Section */}
         <div>
           {/* Discount Badge */}
-          <span className="bg-red-500 text-white px-3 py-1 rounded-full text-sm inline-block mb-2">
-            -{product.discount}%
-          </span>
+          {discount > 0 && (
+            <span className="bg-red-500 text-white px-3 py-1 rounded-full text-sm inline-block mb-2">
+              -{discount}%
+            </span>
+          )}
 
           {/* Product Title */}
           <h1 className="text-3xl font-bold mb-2">{product.name}</h1>
@@ -153,13 +186,15 @@ export default function ProductPage() {
             <span className="text-gray-500">(4 Reviews)</span>
           </div>
           <p className="text-xl text-red-500 gap-10">
-            <span className="line-through text-gray-400">Rs {product.originalPrice}</span>
+            {originalPrice && (
+              <span className="line-through text-gray-400">Rs {originalPrice}</span>
+            )}
             Rs {product.price}{' '}
           </p>
           <p className="text-sm mt-2">Tax not included</p>
 
           {/* Description Preview */}
-          <p className="mt-4 text-gray-600">{product.tabs.Description.slice(0, 300)}...</p>
+          <p className="mt-4 text-gray-600">{(product.description ?? '').slice(0, 300) || '—'}</p>
 
           {/* Add to Cart Section */}
           <div className="mt-6 flex items-center gap-6 flex-wrap">
@@ -184,12 +219,7 @@ export default function ProductPage() {
             <button
               onClick={async () => {
                 try {
-                  const res = await fetch('/api/products')
-                  const products = await res.json()
-                  const toSlug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
-                  const targetSlug = toSlug(product.name)
-                  const match = products.find((p: any) => p.slug === targetSlug) ?? products[0]
-                  if (match?.id) await addToCart(match.id, quantity)
+                  await addToCart(product.id, quantity)
                 } catch (e) {
                   console.error(e)
                 }
@@ -215,7 +245,13 @@ export default function ProductPage() {
 
           {/* Features Section */}
           <div className="mt-8 grid grid-cols-2 md:grid-cols-5 gap-x-[10px] gap-y-[10px]">
-            {product.features.map((feature, idx) => (
+            {[
+              { icon: '/Static/icons/sine.png', label: 'Pure Sine Wave' },
+              { icon: '/Static/icons/MPPT.png', label: 'True MPPT' },
+              { icon: '/Static/icons/Wall.png', label: 'Wall Mount Design' },
+              { icon: '/Static/icons/Fast.png', label: 'Fast Charging' },
+              { icon: '/Static/icons/Advanced.png', label: 'Advanced DSP Technology' },
+            ].map((feature, idx) => (
               <div key={idx} className="flex flex-col items-center">
                 <img src={feature.icon} alt={feature.label} className="w-[50px] h-[50px]" />
                 <span className="text-sm text-center mt-[5px]">{feature.label}</span>
@@ -228,7 +264,7 @@ export default function ProductPage() {
       {/* Tabs Section */}
       <div className="mt-[30px] max-w-[1440px] mx-auto p-[15px]">
         <div className="flex justify-center gap-[20px] border-b pb-[10px]">
-          {(Object.keys(product.tabs) as ProductTabs[]).map((tab) => (
+          {productTabs.map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -239,15 +275,25 @@ export default function ProductPage() {
             </button>
           ))}
         </div>
-        <div className="mt-[20px] text-gray-700">{product.tabs[activeTab]}</div>
+        <div className="mt-[20px] text-gray-700">
+          {{
+            Description: product.description ?? '—',
+            Shipping: product.shipping ?? '—',
+            FAQ: 'Common questions and answers about the product.',
+            Review: '—',
+            Specifications: product.specifications ?? '—',
+          }[activeTab]}
+        </div>
       </div>
 
       {/* Suggested Products */}
       <h1 className='text-4xl text-center py-2 sm:text-lg md:text-2xl'>You may also Like</h1>
-      <div className="flex flex-wrap justify-center gap-6 py-10">
-        {productList.map((product, index) => (
-          <ProductCardDetailed key={index} hoverImage={undefined} {...product} />
-        ))}
+      <div className="px-4 sm:px-6 md:px-12 py-10 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 items-stretch">
+          {productList.map((product, index) => (
+            <ProductCardDetailed key={index} hoverImage={undefined} {...product} />
+          ))}
+        </div>
       </div>
 
       <Footer />
