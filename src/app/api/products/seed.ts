@@ -1,6 +1,15 @@
 import { prisma } from '@/lib/prisma'
 
 export async function seedProducts() {
+  // Deterministic fallback discount percent based on slug (10%..50% rounded to 5%)
+  const discountPctFor = (slug: string): number => {
+    let sum = 0
+    for (const ch of slug) sum = (sum + ch.charCodeAt(0)) % 1000
+    const pct = 10 + (sum % 31)
+    const rounded = Math.min(50, Math.max(10, Math.round(pct / 5) * 5))
+    return rounded
+  }
+
   const defaults = [
     {
       slug: '3-in-1-inverter',
@@ -43,10 +52,20 @@ export async function seedProducts() {
   // Upsert each product so new ones are added over time without duplicates
   for (const p of defaults) {
     // eslint-disable-next-line no-await-in-loop
-    await prisma.product.upsert({
-      where: { slug: p.slug },
-      update: {},
-      create: { ...p },
-    })
+    const existing = await prisma.product.findUnique({ where: { slug: p.slug } })
+    const pct = discountPctFor(p.slug)
+    if (!existing) {
+      // Create with a default discountPercent so UI/Admin sees it
+      // Note: price is treated as current discounted price elsewhere in UI
+      await prisma.product.create({
+        data: { ...p, discountPercent: pct },
+      })
+    } else if (existing.discountPercent == null) {
+      // Backfill discountPercent for already seeded products that missed it
+      await prisma.product.update({
+        where: { slug: p.slug },
+        data: { discountPercent: pct },
+      })
+    }
   }
 }

@@ -6,6 +6,7 @@ import Footer from '../../components/footer';
 import ProductCardDetailed from "../components/productcarddetailed";
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
+import Link from 'next/link';
 import { useCart } from '../../context/CartContext';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import type { Swiper as SwiperType } from 'swiper';
@@ -14,32 +15,7 @@ import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import { Navigation, Pagination, Autoplay } from 'swiper/modules';
 
-const productList = [
-  {
-    image: "/Static/Image/about2.png",
-    discount: "-30%",
-    title: "Smart Inverter",
-    reviews: "120",
-    price: "20000",
-    timer: "255d : 45h : 44m : 10s",
-  },
-  {
-    image: "/Static/Image/about2.png",
-    discount: "-20%",
-    title: "Smart Fan",
-    reviews: "80",
-    price: "15000",
-    timer: "100d : 12h : 15m : 20s",
-  },
-  {
-    image: "/Static/Image/about2.png",
-    discount: "-50%",
-    title: "Air Conditioner",
-    reviews: "350",
-    price: "50000",
-    timer: "365d : 10h : 12m : 30s",
-  },
-];
+// Suggestion list will be fetched dynamically; removed static placeholders
 
 type ApiProduct = {
   id: number
@@ -67,6 +43,7 @@ export default function ProductPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { addToCart } = useCart();
+  const [related, setRelated] = useState<ApiProduct[]>([])
 
   useEffect(() => {
     let alive = true
@@ -82,6 +59,22 @@ export default function ProductPage() {
         if (alive) setError(e?.message || 'Failed to load product')
       } finally {
         if (alive) setLoading(false)
+      }
+    })()
+    return () => { alive = false }
+  }, [slug])
+
+  // Fetch other products for "You may also like" (exclude current)
+  useEffect(() => {
+    let alive = true
+    ;(async () => {
+      try {
+        const res = await fetch('/api/products', { cache: 'no-store' })
+        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+        const list: ApiProduct[] = await res.json()
+        if (alive) setRelated(list.filter((p) => p.slug !== slug).slice(0, 6))
+      } catch {
+        if (alive) setRelated([])
       }
     })()
     return () => { alive = false }
@@ -119,7 +112,7 @@ export default function ProductPage() {
 
   const productImages = [product.imageUrl || '/next.svg', product.imageUrl || '/next.svg', product.imageUrl || '/next.svg']
   const discount = product.discountPercent ?? 0
-  const originalPrice = discount > 0 ? Math.round(product.price / (1 - discount / 100)) : null
+  const originalPrice = discount > 0 && (1 - discount / 100) > 0 ? Math.round(product.price / (1 - discount / 100)) : null
 
   return (
     <>
@@ -129,7 +122,9 @@ export default function ProductPage() {
       {/* Breadcrumb */}
       <div className="bg-[#F0F0F0] py-2 lg:p-6">
         <div className="w-full mx-auto text-xl text-black">
-          <span className='mx-4'>Products</span> &gt; <span className="font-semibold mx-4">{product.name}</span>
+          <Link href="/products" className='mx-4 hover:underline'>Products</Link>
+          &gt;
+          <span className="font-semibold mx-4">{product.name}</span>
         </div>
       </div>
 
@@ -187,9 +182,9 @@ export default function ProductPage() {
           </div>
           <p className="text-xl text-red-500 gap-10">
             {originalPrice && (
-              <span className="line-through text-gray-400">Rs {originalPrice}</span>
+              <span className="line-through text-gray-400 mr-3">Rs {originalPrice}</span>
             )}
-            Rs {product.price}{' '}
+            Rs {product.price}
           </p>
           <p className="text-sm mt-2">Tax not included</p>
 
@@ -290,8 +285,18 @@ export default function ProductPage() {
       <h1 className='text-4xl text-center py-2 sm:text-lg md:text-2xl'>You may also Like</h1>
       <div className="px-4 sm:px-6 md:px-12 py-10 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 items-stretch">
-          {productList.map((product, index) => (
-            <ProductCardDetailed key={index} hoverImage={undefined} {...product} />
+          {related.map((p) => (
+            <ProductCardDetailed
+              key={p.id}
+              image={p.imageUrl || '/next.svg'}
+              discount={p.discountPercent ? `-${p.discountPercent}%` : undefined}
+              title={p.name}
+              reviews={"0"}
+              price={p.price}
+              timer={"—"}
+              slug={p.slug}
+              discountPercent={p.discountPercent ?? null}
+            />
           ))}
         </div>
       </div>

@@ -22,9 +22,10 @@ import ProductCardDetailed from "./productcarddetailed"; // Import the reusable 
   discount?: string
   title: string
   reviews: string
-  price: string
+  price: number
   timer: string
   slug: string
+  discountPercent?: number | null
  }
  
 // Tabs Names (Custom Names)
@@ -82,15 +83,28 @@ const ProductCatalogue: React.FC<{ tabs: TabKey[]; useDetailedCards?: boolean }>
     return `-${rounded}%`
   }
 
-  const toCard = (p: ApiProduct): CardProduct => ({
-    image: p.imageUrl || '/placeholder.svg',
-    title: p.name,
-    price: String(p.price),
-    reviews: String(p._count?.cartItems ?? 0), // placeholder until reviews exist
-    timer: '—',
-    slug: p.slug,
-    discount: (p.discountPercent != null ? `-${p.discountPercent}%` : discountFor(p.slug)),
-  })
+  // Numeric counterpart so cards can compute strike-through pricing even when DB doesn't have discountPercent
+  const discountPctFor = (slug: string): number => {
+    let sum = 0
+    for (const ch of slug) sum = (sum + ch.charCodeAt(0)) % 1000
+    const pct = 10 + (sum % 31)
+    const rounded = Math.min(50, Math.max(10, Math.round(pct / 5) * 5))
+    return rounded
+  }
+
+  const toCard = (p: ApiProduct): CardProduct => {
+    const pct = p.discountPercent ?? discountPctFor(p.slug)
+    return {
+      image: p.imageUrl || '/placeholder.svg',
+      title: p.name,
+      price: p.price,
+      reviews: String(p._count?.cartItems ?? 0), // placeholder until reviews exist
+      timer: '—',
+      slug: p.slug,
+      discount: `-${pct}%`,
+      discountPercent: pct,
+    }
+  }
 
   const grouped = useMemo(() => {
     const list = items ?? []
@@ -119,7 +133,7 @@ const ProductCatalogue: React.FC<{ tabs: TabKey[]; useDetailedCards?: boolean }>
     const list = grouped[selectedTab] as CardProduct[]
     return list?.map((product) => (
       useDetailedCards ? (
-        <ProductCardDetailed key={product.slug} {...product} />
+        <ProductCardDetailed key={product.slug} image={product.image} hoverImage={product.hoverImage} discount={product.discount} title={product.title} reviews={product.reviews} price={product.price} timer={product.timer} slug={product.slug} discountPercent={product.discountPercent} />
       ) : (
         <ProductCardCatalog key={product.slug} image={product.image} title={product.title} />
       )

@@ -6,12 +6,15 @@ import { useCart } from "../../context/CartContext";
 import "@fortawesome/fontawesome-free/css/all.min.css"; // Import Font Awesome
 import QuantityControls from "./QuantityControls";
 
-type Props = { image: string; hoverImage?: string; discount?: string; title: string; reviews: string; price: string; timer: string; slug?: string }
+type Props = { image: string; hoverImage?: string; discount?: string; title: string; reviews: string; price: number; timer: string; slug?: string; discountPercent?: number | null }
 
-const ProductCardDetailed = ({ image, hoverImage, discount, title, reviews, price, timer, slug: slugProp }: Props) => {
+const ProductCardDetailed = ({ image, hoverImage, discount, title, reviews, price, timer, slug: slugProp, discountPercent }: Props) => {
   const { addToCart, updateQuantity, items } = useCart();
   const toSlug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
   const slug = useMemo(() => slugProp || toSlug(title), [slugProp, title])
+  const pct = typeof discountPercent === 'number' ? discountPercent : 0
+  const hasDiscount = pct > 0
+  const originalPrice = hasDiscount && (1 - pct / 100) > 0 ? Math.round(price / (1 - pct / 100)) : null
   return (
     <div className="group relative shadow-lg rounded-xl bg-white mx-auto w-full h-full overflow-hidden">
       <div className="relative bg-[#EDEDED] h-80">
@@ -68,7 +71,16 @@ const ProductCardDetailed = ({ image, hoverImage, discount, title, reviews, pric
       </p>
       <h3 className="text-xl md:text-2xl font-semibold px-4">{title}</h3>
       <div className="flex items-center justify-between px-4 pb-3">
-        <p className="text-red-600 font-bold text-lg md:text-xl">Rs {price}</p>
+        <p className="text-red-600 font-bold text-lg md:text-xl">
+          {hasDiscount && originalPrice ? (
+            <>
+              <span className="line-through text-gray-400 mr-2">Rs {originalPrice}</span>
+              Rs {price}
+            </>
+          ) : (
+            <>Rs {price}</>
+          )}
+        </p>
         {discount && (
           <span className="bg-red-600/10 text-red-700 text-xs md:text-sm font-semibold rounded px-2 py-1">
             {discount}

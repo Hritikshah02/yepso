@@ -12,6 +12,7 @@ interface CartProduct {
   name: string
   price: number
   imageUrl?: string | null
+  discountPercent?: number | null
 }
 
 interface CartItem {
@@ -96,7 +97,16 @@ export default function CartPage() {
                       <img src={item.product.imageUrl ?? 'https://res.cloudinary.com/demo/image/upload/f_auto,q_auto/sample'} alt={item.product.name} className="w-20 h-20 object-cover rounded" />
                       <div>
                         <div className="font-semibold">{item.product.name}</div>
-                        <div className="text-gray-600">Rs {item.product.price}</div>
+                        <div className="text-gray-600">
+                          {((item.product.discountPercent ?? 0) > 0) ? (
+                            <>
+                              <span className="line-through text-gray-400 mr-2">Rs {item.product.price}</span>
+                              Rs {Math.round(item.product.price * (1 - (item.product.discountPercent ?? 0) / 100))}
+                            </>
+                          ) : (
+                            <>Rs {item.product.price}</>
+                          )}
+                        </div>
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
@@ -110,7 +120,16 @@ export default function CartPage() {
                         <span className="min-w-6 text-center">{item.quantity}</span>
                         <button className="px-3 py-1 border rounded" onClick={() => updateQty(item.productId, item.quantity + 1)}>+</button>
                       </div>
-                      <div className="w-24 text-right font-medium">Rs {item.product.price * item.quantity}</div>
+                      <div className="w-32 text-right font-medium">
+                        {((item.product.discountPercent ?? 0) > 0) ? (
+                          <>
+                            <span className="line-through text-gray-400 mr-2">Rs {item.product.price * item.quantity}</span>
+                            Rs {Math.round(item.product.price * (1 - (item.product.discountPercent ?? 0) / 100)) * item.quantity}
+                          </>
+                        ) : (
+                          <>Rs {item.product.price * item.quantity}</>
+                        )}
+                      </div>
                       <button className="text-red-600 hover:underline" onClick={() => removeItem(item.productId)}>Remove</button>
                     </div>
                   </div>

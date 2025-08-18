@@ -295,7 +295,17 @@ export default function AdminDashboard() {
             )}
             <div className="flex-1">
               <div className="font-semibold text-lg">{p.name}</div>
-              <div className="text-sm text-gray-600">₹{p.price} · <span className="break-all">{p.slug}</span></div>
+              <div className="text-sm text-gray-600">
+                {(p.discountPercent ?? 0) > 0 ? (
+                  <>
+                    <span className="line-through text-gray-400 mr-2">₹{p.price}</span>
+                    ₹{Math.round(p.price * (1 - (p.discountPercent ?? 0) / 100))}
+                  </>
+                ) : (
+                  <>₹{p.price}</>
+                )}
+                 · <span className="break-all">{p.slug}</span>
+              </div>
               {p.discountPercent != null && (
                 <div className="mt-1 inline-flex items-center px-2 py-0.5 rounded bg-red-600/10 text-red-700 text-xs">-{p.discountPercent}%</div>
               )}
