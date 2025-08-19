@@ -10,7 +10,16 @@ type CatalogCard = {
   apiIndex: number;
 };
 
-const fetchDataFromApis = async () => {
+type ApiProduct = {
+  id: number;
+  slug: string;
+  name: string;
+  price: number;
+  imageUrl?: string | null;
+  createdAt: string;
+};
+
+const fetchCatalogFallback = async () => {
   try {
     const res = await fetch('/api/catalogs', { cache: 'no-store' });
     if (!res.ok) {
@@ -32,12 +41,63 @@ export default function ScrollCards() {
   const [allCards, setAllCards] = useState<CatalogCard[]>([]);
   const [activeApiIndex, setActiveApiIndex] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
+  const [labels, setLabels] = useState<string[]>(["New Drops", "Inverter", "AIO Lithium", "AC Stabiliser"]);
 
   useEffect(() => {
     const getData = async () => {
-      const catalogs = (await fetchDataFromApis()) as any[];
-      const allCards = Array.isArray(catalogs) ? (catalogs.flat() as CatalogCard[]) : [];
-      setAllCards(allCards);
+      try {
+        // Try real products first
+        const res = await fetch('/api/products', { cache: 'no-store' });
+        if (res.ok) {
+          const products: ApiProduct[] = await res.json();
+          const list = Array.isArray(products) ? products : [];
+
+          // Build categories dynamically
+          const text = (p: ApiProduct) => (p.name + ' ' + p.slug).toLowerCase();
+          const byDateDesc = (a: ApiProduct, b: ApiProduct) => +new Date(b.createdAt) - +new Date(a.createdAt);
+
+          const defs = [
+            { label: 'New Drops', match: (_p: ApiProduct) => true, items: [...list].sort(byDateDesc) },
+            { label: 'Inverter', match: (p: ApiProduct) => /inverter/.test(text(p)), items: list.filter((p) => /inverter/.test(text(p))) },
+            { label: 'AIO Lithium', match: (p: ApiProduct) => /(lithium|battery)/.test(text(p)), items: list.filter((p) => /(lithium|battery)/.test(text(p))) },
+            { label: 'AC Stabiliser', match: (p: ApiProduct) => /(stabiliser|stabilizer|voltage)/.test(text(p)), items: list.filter((p) => /(stabiliser|stabilizer|voltage)/.test(text(p))) },
+          ];
+
+          // Keep only non-empty categories
+          const withData = defs.filter((d) => d.items.length > 0);
+          const finalLabels = withData.map((d) => d.label);
+
+          // Build cards flattened in category blocks; apiIndex must match label index
+          const cards: CatalogCard[] = [];
+          withData.forEach((d, idx) => {
+            d.items.forEach((p) => {
+              cards.push({
+                id: p.id,
+                card_title: p.name,
+                card_image: p.imageUrl || '/placeholder.svg',
+                product_image: p.imageUrl || null,
+                apiIndex: idx,
+              });
+            });
+          });
+
+          if (cards.length) {
+            setLabels(finalLabels);
+            setAllCards(cards);
+            setActiveApiIndex(0);
+            setLoading(false);
+            return;
+          }
+        }
+      } catch (e) {
+        // fall through to fallback
+      }
+
+      // Fallback to demo catalogs
+      const catalogs = (await fetchCatalogFallback()) as any[];
+      const cards = Array.isArray(catalogs) ? (catalogs.flat() as CatalogCard[]) : [];
+      setLabels(["New Drops", "Inverter", "AIO Lithium", "AC Stabiliser"]);
+      setAllCards(cards);
       setLoading(false);
     };
     getData();
@@ -79,7 +139,7 @@ export default function ScrollCards() {
   return (
     <main className="w-screen max-w-none h-full flex items-center justify-center py-8 px-0 flex-col">
       <div className="flex flex-row justify-start items-center whitespace-nowrap overflow-x-auto w-full px-4 lg:px-8 gap-6">
-        {["New Drops", "Inverter", "AIO Lithium", "AC Stabiliser"].map((label, index) => (
+        {labels.map((label, index) => (
           <button
             key={index}
             onClick={() => handleScrollToCategory(index)}

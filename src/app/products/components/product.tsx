@@ -37,7 +37,7 @@ const tabNames: Record<TabKey, string> = {
 
 // Tabs Component
 const Tabs: React.FC<{ tabs: TabKey[]; selectedTab: TabKey; onTabClick: (tab: TabKey) => void }> = ({ tabs, selectedTab, onTabClick }) => (
-  <div className="flex space-x-6 text-gray-500 font-semibold text-2xl gap-5">
+  <div className="flex flex-wrap items-center gap-3 sm:gap-5 text-gray-500 font-semibold text-base sm:text-lg md:text-2xl">
     {tabs.map((tab: TabKey) => (
       <span
         key={tab}
@@ -147,7 +147,7 @@ const ProductCatalogue: React.FC<{ tabs: TabKey[]; useDetailedCards?: boolean }>
         <Tabs tabs={tabs} selectedTab={selectedTab} onTabClick={handleTabClick} />
       </div>
 
-      <div className="grid grid-cols-3 items-stretch gap-5 mt-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 items-stretch gap-5 mt-6">
         {renderProducts()}
       </div>
     </div>

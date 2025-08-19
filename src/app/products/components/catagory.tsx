@@ -2,9 +2,11 @@
 import ProductCardCatalog from "./productcard"; 
 import Image from "next/image";
 import Link from "next/link";
+import type { StaticImageData } from "next/image";
+import sampleImg from "../../../../all products front and side png images/sample.jpg";
 
 interface PromoBannerProps {
-  image: string;
+  image: string | StaticImageData;
   discountText: string;
   title: string;
   buttonText: string;
@@ -88,7 +90,7 @@ const Categories: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-8">
         <div> {/* Solar cards in the catalog section*/}
           <SolorBanner
-            image="/Static/product/image.png"
+            image={sampleImg}
             discountText="30% OFF ON STUFF"
             title="Solar Panels"
             buttonText="Shop Now"
@@ -96,7 +98,7 @@ const Categories: React.FC = () => {
         </div>
         <div>
           <SolorBanner
-            image="/Static/product/image.png"
+            image={sampleImg}
             discountText="50% OFF ON STUFF"
             title="Solar Panels"
             buttonText="Shop Now"
