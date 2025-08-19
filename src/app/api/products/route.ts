@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { randomUUID } from 'crypto'
-import { FALLBACK_PRODUCTS } from './seed'
+import { FALLBACK_PRODUCTS, ensureRuntimeProducts } from './seed'
 
 // List products (seeds defaults on first call)
 export async function GET(req: Request) {
@@ -16,59 +16,68 @@ export async function GET(req: Request) {
     return NextResponse.json(products)
   } catch (e) {
     console.error('[api/products] DB error', e)
-    // Avoid 500 in read-only/serverless env; return seeded fallback products
-    return NextResponse.json(FALLBACK_PRODUCTS)
+    // Avoid 500 in read-only/serverless env; return runtime store (or seeded fallback) and respect filters
+    const url = new URL(req.url)
+    const includeInactive = url.searchParams.get('includeInactive') === 'true'
+    const store = ensureRuntimeProducts()
+    const filtered = includeInactive ? store : store.filter(p => p.active)
+    return NextResponse.json(filtered)
   }
 }
 
 // Create a new product
 export async function POST(req: Request) {
+  // Parse once; invalid JSON should 400
+  const body = await req.json().catch(() => null)
+  if (!body || typeof body !== 'object') {
+    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+  }
+
+  const nameRaw = typeof (body as any)?.name === 'string' ? (body as any).name.trim() : ''
+  const priceRaw = (body as any)?.price
+  const imageUrlRaw = typeof (body as any)?.imageUrl === 'string' ? (body as any).imageUrl.trim() : ''
+  const discountPercentRaw = (body as any)?.discountPercent
+  const descriptionRaw = typeof (body as any)?.description === 'string' ? (body as any).description.trim() : ''
+  const shippingRaw = typeof (body as any)?.shipping === 'string' ? (body as any).shipping.trim() : ''
+  const specificationsRaw = typeof (body as any)?.specifications === 'string' ? (body as any).specifications.trim() : ''
+  const activeRaw = (body as any)?.active
+
+  if (!nameRaw) return NextResponse.json({ error: 'Name is required' }, { status: 400 })
+
+  const price = Number(priceRaw)
+  if (!Number.isInteger(price) || price < 0) {
+    return NextResponse.json({ error: 'Price must be a non-negative integer (in INR)' }, { status: 400 })
+  }
+
+  const imageUrl = imageUrlRaw || null
+
+  let discountPercent: number | null = null
+  if (discountPercentRaw !== undefined && discountPercentRaw !== null && String(discountPercentRaw).trim() !== '') {
+    const d = Number(discountPercentRaw)
+    if (!Number.isInteger(d) || d < 0 || d > 90) {
+      return NextResponse.json({ error: 'discountPercent must be an integer between 0 and 90' }, { status: 400 })
+    }
+    discountPercent = d
+  }
+
+  const description = descriptionRaw || null
+  const shipping = shippingRaw || null
+  const specifications = specificationsRaw || null
+  const active = typeof activeRaw === 'boolean' ? activeRaw : true
+
+  const makeSlug = (s: string) =>
+    s
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .trim()
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+
+  let slug = makeSlug(nameRaw)
+  if (!slug) slug = `product-${randomUUID().slice(0, 8)}`
+
   try {
-    const body = await req.json()
-    const nameRaw = typeof body?.name === 'string' ? body.name.trim() : ''
-    const priceRaw = body?.price
-    const imageUrlRaw = typeof body?.imageUrl === 'string' ? body.imageUrl.trim() : ''
-    const discountPercentRaw = body?.discountPercent
-    const descriptionRaw = typeof body?.description === 'string' ? body.description.trim() : ''
-    const shippingRaw = typeof body?.shipping === 'string' ? body.shipping.trim() : ''
-    const specificationsRaw = typeof body?.specifications === 'string' ? body.specifications.trim() : ''
-    const activeRaw = body?.active
-
-    if (!nameRaw) return NextResponse.json({ error: 'Name is required' }, { status: 400 })
-
-    const price = Number(priceRaw)
-    if (!Number.isInteger(price) || price < 0) {
-      return NextResponse.json({ error: 'Price must be a non-negative integer (in INR)' }, { status: 400 })
-    }
-
-    const imageUrl = imageUrlRaw || null
-
-    let discountPercent: number | null = null
-    if (discountPercentRaw !== undefined && discountPercentRaw !== null && String(discountPercentRaw).trim() !== '') {
-      const d = Number(discountPercentRaw)
-      if (!Number.isInteger(d) || d < 0 || d > 90) {
-        return NextResponse.json({ error: 'discountPercent must be an integer between 0 and 90' }, { status: 400 })
-      }
-      discountPercent = d
-    }
-
-    const description = descriptionRaw || null
-    const shipping = shippingRaw || null
-    const specifications = specificationsRaw || null
-    const active = typeof activeRaw === 'boolean' ? activeRaw : true
-
-    const makeSlug = (s: string) =>
-      s
-        .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, '')
-        .trim()
-        .replace(/\s+/g, '-')
-        .replace(/-+/g, '-')
-
-    let slug = makeSlug(nameRaw)
-    if (!slug) slug = `product-${randomUUID().slice(0, 8)}`
-
-    // Ensure unique slug
+    // Ensure unique slug in DB
     const existing = await prisma.product.findUnique({ where: { slug } })
     if (existing) slug = `${slug}-${randomUUID().slice(0, 6)}`
 
@@ -86,7 +95,28 @@ export async function POST(req: Request) {
       },
     })
     return NextResponse.json(product, { status: 201 })
-  } catch {
-    return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
+  } catch (e) {
+    // Serverless fallback: write to runtime store
+    const store = ensureRuntimeProducts()
+    // ensure unique slug in runtime store
+    if (store.some(p => p.slug === slug)) slug = `${slug}-${randomUUID().slice(0, 6)}`
+    const nextId = (store.reduce((m, p) => Math.max(m, p.id), 0) || 0) + 1
+    const now = new Date().toISOString()
+    const created = {
+      id: nextId,
+      slug,
+      name: nameRaw,
+      price,
+      imageUrl: imageUrl ?? undefined,
+      discountPercent: discountPercent ?? undefined,
+      active,
+      createdAt: now,
+      _count: { cartItems: 0 },
+      description: description ?? undefined,
+      shipping: shipping ?? undefined,
+      specifications: specifications ?? undefined,
+    } as any
+    store.unshift(created)
+    return NextResponse.json(created, { status: 201 })
   }
 }

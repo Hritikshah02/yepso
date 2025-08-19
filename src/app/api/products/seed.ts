@@ -62,6 +62,18 @@ export const FALLBACK_PRODUCTS = DEFAULT_PRODUCT_SEED.map((p, idx) => ({
   _count: { cartItems: 0 },
 }))
 
+// Types and runtime in-memory store for serverless write fallbacks
+export type ProductShape = typeof FALLBACK_PRODUCTS[number]
+export let RUNTIME_PRODUCTS: ProductShape[] | null = null
+
+export function ensureRuntimeProducts(): ProductShape[] {
+  if (!RUNTIME_PRODUCTS) {
+    // clone to avoid mutating the FALLBACK constant
+    RUNTIME_PRODUCTS = FALLBACK_PRODUCTS.map(p => ({ ...p }))
+  }
+  return RUNTIME_PRODUCTS
+}
+
 export async function seedProducts() {
   // Upsert each product so new ones are added over time without duplicates
   for (const p of DEFAULT_PRODUCT_SEED) {
