@@ -1,6 +1,7 @@
 'use client'
 import { useState, useRef } from 'react';
 import Image from 'next/image';
+import type { StaticImageData } from 'next/image';
 import Image1 from "../../../public/Static/Image/image1.png"
 import Image2 from "../../../public/Static/Image/image2.png"
 import Image3 from "../../../public/Static/Image/image3.png"
@@ -8,16 +9,16 @@ import Image4 from "../../../public/Static/Image/image4.png"
 import Image5 from "../../../public/Static/Image/image4.png"
 interface CardData {
   id: number;
-  img: string;
+  img: StaticImageData;
   text: string;
 }
 
 const cardsData: CardData[] = [
-  { id: 1, img: {Image1}, text: 'Card 1' },
-  { id: 2, img: {Image2}, text: 'Card 2' },
-  { id: 3, img: {Image3}, text: 'Card 3' },
-  { id: 4, img: {Image4}, text: 'Card 4' },
-  { id: 5, img: {Image5}, text: 'Card 5' },
+  { id: 1, img: Image1, text: 'Card 1' },
+  { id: 2, img: Image2, text: 'Card 2' },
+  { id: 3, img: Image3, text: 'Card 3' },
+  { id: 4, img: Image4, text: 'Card 4' },
+  { id: 5, img: Image5, text: 'Card 5' },
 ];
 
 const Home = () => {
@@ -61,7 +62,9 @@ const Home = () => {
             <Image
               src={card.img}
               alt={`Card ${card.id}`}
-              className="w-full h-full object-cover"
+              fill
+              sizes="(max-width: 768px) 80vw, 18rem"
+              className="object-cover"
             />
             <div className="absolute bottom-4 left-4 text-white bg-black bg-opacity-50 p-4 w-full">
               <p>{card.text}</p>

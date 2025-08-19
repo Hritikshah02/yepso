@@ -1,11 +1,17 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
-import Head from "next/head";
 import Image from "next/image";
 import parse from "html-react-parser";
 
-const fetchDataFromApis = async () => {
+type CatalogCard = {
+  id: number | string;
+  card_title: string;
+  card_image: string;
+  catalogs_desc: string;
+};
+
+const fetchDataFromApis = async (): Promise<CatalogCard[][]> => {
   const urls = [
     'http://127.0.0.1:8000/catalog/catalogs_ac_stabalizer/',
     'http://127.0.0.1:8000/catalog/catalogs_inveter/',
@@ -14,26 +20,22 @@ const fetchDataFromApis = async () => {
   ];
 
   const responses = await Promise.all(urls.map((url) => fetch(url)));
-  const data = await Promise.all(responses.map((response) => response.json()));
-  return data;
+  const data = await Promise.all(responses.map((response) => response.json() as Promise<CatalogCard[]>));
+  return data as CatalogCard[][];
 };
 
 export default function ScrollCards() {
-  const containerRef = useRef(null);
-  const wrapperRef = useRef(null);
-  const [scrollX, setScrollX] = useState(0);
-  const [touchStartX, setTouchStartX] = useState(0);
-  const [allCards, setAllCards] = useState([]);
-  const [title, setTitle] = useState("");
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
+  const [scrollX, setScrollX] = useState<number>(0);
+  const [touchStartX, setTouchStartX] = useState<number>(0);
+  const [allCards, setAllCards] = useState<CatalogCard[]>([]);
 
   useEffect(() => {
     const getData = async () => {
       const catalogs = await fetchDataFromApis();
       const allCards = catalogs.flat();
       setAllCards(allCards);
-      if (allCards.length > 0) {
-        setTitle(allCards[0].card_title);
-      }
     };
     getData();
   }, []);
@@ -42,14 +44,14 @@ export default function ScrollCards() {
     if (!containerRef.current || !wrapperRef.current) return;
 
     const container = containerRef.current;
-    const handleWheelScroll = (event) => {
+    const handleWheelScroll = (event: WheelEvent) => {
       event.preventDefault();
-      const totalWidth = wrapperRef.current.scrollWidth - container.clientWidth;
+      const totalWidth = (wrapperRef.current as HTMLDivElement).scrollWidth - container.clientWidth;
       const moveDistance = event.deltaY;
       const newPos = Math.min(Math.max(0, scrollX + moveDistance), totalWidth);
       setScrollX(newPos);
 
-      gsap.to(wrapperRef.current, {
+      gsap.to(wrapperRef.current as HTMLDivElement, {
         x: -newPos,
         ease: "power2.out",
         duration: 0.5,
@@ -57,19 +59,19 @@ export default function ScrollCards() {
       });
     };
 
-    const handleTouchStart = (event) => {
+    const handleTouchStart = (event: TouchEvent) => {
       setTouchStartX(event.touches[0].clientX);
     };
 
-    const handleTouchMove = (event) => {
+    const handleTouchMove = (event: TouchEvent) => {
       event.preventDefault();
-      const totalWidth = wrapperRef.current.scrollWidth - container.clientWidth;
+      const totalWidth = (wrapperRef.current as HTMLDivElement).scrollWidth - container.clientWidth;
       const touchMoveX = event.touches[0].clientX;
       const moveDistance = touchStartX - touchMoveX;
       const newPos = Math.min(Math.max(0, scrollX + moveDistance), totalWidth);
       setScrollX(newPos);
 
-      gsap.to(wrapperRef.current, {
+      gsap.to(wrapperRef.current as HTMLDivElement, {
         x: -newPos,
         ease: "power2.out",
         duration: 0.5,
@@ -99,13 +101,13 @@ export default function ScrollCards() {
               className="max-w-sm mx-auto group transform transition-all duration-300 ease-in-out hover:scale-107"
             >
               <div className="bg-white rounded-lg overflow-hidden shadow-lg relative group">
-                <div className="relative">
-                  <img
+                <div className="relative w-full h-64">
+                  <Image
                     src={card.card_image}
                     alt={card.card_title}
-                    layout="fill"
-                    objectFit="cover"
-                    className="w-full h-64 object-cover"
+                    fill
+                    sizes="(max-width: 640px) 90vw, (max-width: 1024px) 50vw, 400px"
+                    className="object-cover"
                   />
                   <div className="absolute bottom-2 left-2 text-white font-semibold text-lg bg-black bg-opacity-50 p-2 rounded">
                     {card.card_title}

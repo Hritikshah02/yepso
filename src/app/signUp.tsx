@@ -1,25 +1,36 @@
-import { useState } from 'react';
+'use client';
+import { useState, type ChangeEvent, type FormEvent } from 'react';
+
+type FormData = {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+};
+
+type Errors = Partial<Record<keyof FormData | 'submit', string>>;
 
 export default function SignUp() {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     name: '',
     email: '',
     password: '',
     confirmPassword: '',
   });
-  
-  const [errors, setErrors] = useState({});
-  
-  const handleChange = (e) => {
-    const { name, value } = e.target;
+
+  const [errors, setErrors] = useState<Errors>({});
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const name = e.target.name as keyof FormData;
+    const value = e.target.value;
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
     }));
   };
 
-  const validateForm = () => {
-    const newErrors = {};
+  const validateForm = (): Errors => {
+    const newErrors: Errors = {};
     if (!formData.name) newErrors.name = 'Name is required';
     if (!formData.email || !/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Valid email is required';
     if (!formData.password) newErrors.password = 'Password is required';
@@ -27,7 +38,7 @@ export default function SignUp() {
     return newErrors;
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const validationErrors = validateForm();
     if (Object.keys(validationErrors).length > 0) {

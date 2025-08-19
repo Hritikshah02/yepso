@@ -11,6 +11,7 @@ export default function VoltageEngineer() {
   useEffect(() => {
     const handleScroll = () => {
       const textElement = document.getElementById('highlightText');
+      if (!textElement) return; // guard against null
       const bounding = textElement.getBoundingClientRect();
 
       // Check if the element is in view
@@ -53,8 +54,8 @@ export default function VoltageEngineer() {
         <Image
           src={textBanner}
           alt="Background Red"
-          layout="fill"
-          className="absolute inset-0 -z-10"
+          fill
+          className="absolute inset-0 -z-10 object-cover"
         />
         is customer satisfaction!!
       </div>

@@ -10,6 +10,12 @@ const compat = new FlatCompat({
 });
 
 const eslintConfig = [
+  // Ignore generated/build output to prevent noisy lint errors from compiled code
+  { ignores: [
+    "src/generated/**",
+    "build/**",
+    ".next/**",
+  ]},
   ...compat.extends("next/core-web-vitals", "next/typescript"),
 ];
 

@@ -27,11 +27,13 @@ const product = {
     Review: '4.0 (4 Reviews)',
     Specifications: 'Input Voltage: 12V, Output: 220V, Efficiency: 95%+',
   },
-};
+} as const;
+
+type TabKey = keyof typeof product.tabs;
 
 export default function ProductPage() {
   const [activeImage, setActiveImage] = useState(0);
-  const [activeTab, setActiveTab] = useState('Description');
+  const [activeTab, setActiveTab] = useState<TabKey>('Description');
   const [isInteracting, setIsInteracting] = useState(false);
 
   useEffect(() => {
@@ -96,7 +98,7 @@ export default function ProductPage() {
         {/* Tabs */}
         <div className="mt-8">
           <div className="flex gap-6 border-b">
-            {Object.keys(product.tabs).map((tab) => (
+            {(Object.keys(product.tabs) as TabKey[]).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}

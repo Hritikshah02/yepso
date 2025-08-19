@@ -1,9 +1,9 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 
-export default function CheckoutSuccess() {
+function CheckoutSuccessInner() {
   const sp = useSearchParams();
   const orderId = sp.get("orderId") || "";
 
@@ -93,5 +93,13 @@ export default function CheckoutSuccess() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function CheckoutSuccess() {
+  return (
+    <Suspense fallback={<div className="max-w-2xl mx-auto p-8">Loading...</div>}>
+      <CheckoutSuccessInner />
+    </Suspense>
   );
 }

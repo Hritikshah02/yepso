@@ -1,30 +1,35 @@
 'use client';
 import { useState } from 'react';
 import Image from 'next/image';
-import Image1 from "../../../public/Static/Image/image1.png"
-import Image2 from "../../../public/Static/Image/image2.png"
-import Image3 from "../../../public/Static/Image/image3.png"
-import Image4 from "../../../public/Static/Image/image4.png"
+import type { StaticImageData } from 'next/image';
+import Image1 from "../../../public/Static/Image/image1.png";
+import Image2 from "../../../public/Static/Image/image2.png";
+import Image3 from "../../../public/Static/Image/image3.png";
+import Image4 from "../../../public/Static/Image/image4.png";
+
 const categories = [
   { id: 'new-drops', label: 'New Drops' },
   { id: 'inverter', label: 'Inverter' },
   { id: 'aio-lithium', label: 'AIO Lithium' },
-  { id: 'ac-stabiliser', label: 'Ac Stabiliser' }
-];
+  { id: 'ac-stabiliser', label: 'Ac Stabiliser' },
+] as const;
 
-const products = {
+type CategoryId = typeof categories[number]['id'];
+type ProductCard = { image: StaticImageData; title: string };
+
+const products: Record<CategoryId, ProductCard[]> = {
   'new-drops': [
-    { image: {Image1}, title: 'Solar Inverter' },
-    { image: {Image2}, title: 'AC St' },
-    { image: {Image3}, title: 'AC St' }
+    { image: Image1, title: 'Solar Inverter' },
+    { image: Image2, title: 'AC St' },
+    { image: Image3, title: 'AC St' },
   ],
   inverter: [],
   'aio-lithium': [],
-  'ac-stabiliser': []
+  'ac-stabiliser': [],
 };
 
 export default function ProductShowcase() {
-  const [selectedCategory, setSelectedCategory] = useState('new-drops');
+  const [selectedCategory, setSelectedCategory] = useState<CategoryId>('new-drops');
 
   return (
     <div className="flex flex-col items-center w-full p-4">
