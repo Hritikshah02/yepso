@@ -1,8 +1,12 @@
 import type { NextConfig } from "next";
 
+// Avoid custom distDir on Vercel — it expects `.next/` to exist during build
+const isVercel = !!process.env.VERCEL;
+
 const nextConfig: NextConfig = {
-  // Use a custom build output directory to avoid OneDrive locking .next/trace on Windows
-  distDir: "build",
+  // Use a custom build output directory locally to avoid OneDrive locking .next/trace on Windows
+  // On Vercel, keep default `.next/` so the platform can find routes-manifest.json
+  ...(isVercel ? {} : { distDir: "build" }),
   // Do not fail production builds on ESLint errors (generated code may trigger rules)
   eslint: {
     ignoreDuringBuilds: true,
