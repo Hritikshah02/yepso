@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { FALLBACK_PRODUCTS } from '../seed'
 
-export async function GET(_req: Request, { params }: { params: { slug: string } }) {
-  const { slug } = params
+export async function GET(_req: Request, ctx: any) {
+  const slug = (ctx?.params?.slug ?? '') as string
   try {
     const product = await prisma.product.findUnique({ where: { slug } })
     if (!product) return NextResponse.json({ error: 'Not found' }, { status: 404 })
@@ -16,8 +16,8 @@ export async function GET(_req: Request, { params }: { params: { slug: string } 
   }
 }
 
-export async function DELETE(_req: Request, { params }: { params: { slug: string } }) {
-  const { slug } = params
+export async function DELETE(_req: Request, ctx: any) {
+  const slug = (ctx?.params?.slug ?? '') as string
   const product = await prisma.product.findUnique({ where: { slug } })
   if (!product) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
@@ -43,8 +43,8 @@ export async function DELETE(_req: Request, { params }: { params: { slug: string
 }
 
 // Update fields (e.g., active toggle, discountPercent, description, shipping, specifications)
-export async function PATCH(req: Request, { params }: { params: { slug: string } }) {
-  const { slug } = params
+export async function PATCH(req: Request, ctx: any) {
+  const slug = (ctx?.params?.slug ?? '') as string
   const body = await req.json().catch(() => ({}))
 
   const data: any = {}
