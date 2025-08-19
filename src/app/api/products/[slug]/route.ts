@@ -1,15 +1,23 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { FALLBACK_PRODUCTS } from '../seed'
 
-export async function GET(_req: Request, { params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params
-  const product = await prisma.product.findUnique({ where: { slug } })
-  if (!product) return NextResponse.json({ error: 'Not found' }, { status: 404 })
-  return NextResponse.json(product)
+export async function GET(_req: Request, { params }: { params: { slug: string } }) {
+  const { slug } = params
+  try {
+    const product = await prisma.product.findUnique({ where: { slug } })
+    if (!product) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+    return NextResponse.json(product)
+  } catch (e) {
+    // Fallback to seeded static data in serverless/read-only environments
+    const fallback = FALLBACK_PRODUCTS.find(p => p.slug === slug)
+    if (!fallback) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+    return NextResponse.json(fallback)
+  }
 }
 
-export async function DELETE(_req: Request, { params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params
+export async function DELETE(_req: Request, { params }: { params: { slug: string } }) {
+  const { slug } = params
   const product = await prisma.product.findUnique({ where: { slug } })
   if (!product) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
@@ -35,8 +43,8 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ slug
 }
 
 // Update fields (e.g., active toggle, discountPercent, description, shipping, specifications)
-export async function PATCH(req: Request, { params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params
+export async function PATCH(req: Request, { params }: { params: { slug: string } }) {
+  const { slug } = params
   const body = await req.json().catch(() => ({}))
 
   const data: any = {}

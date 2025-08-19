@@ -1,19 +1,24 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { seedProducts } from './seed'
 import { randomUUID } from 'crypto'
+import { FALLBACK_PRODUCTS } from './seed'
 
 // List products (seeds defaults on first call)
 export async function GET(req: Request) {
-  await seedProducts()
-  const url = new URL(req.url)
-  const includeInactive = url.searchParams.get('includeInactive') === 'true'
-  const products = await prisma.product.findMany({
-    where: includeInactive ? {} : { active: true },
-    include: { _count: { select: { cartItems: true } } },
-    orderBy: { createdAt: 'desc' },
-  })
-  return NextResponse.json(products)
+  try {
+    const url = new URL(req.url)
+    const includeInactive = url.searchParams.get('includeInactive') === 'true'
+    const products = await prisma.product.findMany({
+      where: includeInactive ? {} : { active: true },
+      include: { _count: { select: { cartItems: true } } },
+      orderBy: { createdAt: 'desc' },
+    })
+    return NextResponse.json(products)
+  } catch (e) {
+    console.error('[api/products] DB error', e)
+    // Avoid 500 in read-only/serverless env; return seeded fallback products
+    return NextResponse.json(FALLBACK_PRODUCTS)
+  }
 }
 
 // Create a new product
