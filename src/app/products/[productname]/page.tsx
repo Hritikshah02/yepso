@@ -52,12 +52,13 @@ export default function ProductPage() {
       try {
         setLoading(true)
         setError(null)
-        const res = await fetch(`/api/products/${encodeURIComponent(slug)}`, { cache: 'no-store' })
+        const res = await fetch(`/api/products?slug=${encodeURIComponent(slug)}`, { cache: 'no-store' })
         if (!res.ok) throw new Error(`HTTP ${res.status}`)
         const data: ApiProduct = await res.json()
         if (alive) setProduct(data)
-      } catch (e: any) {
-        if (alive) setError(e?.message || 'Failed to load product')
+      } catch (e: unknown) {
+        const msg = e instanceof Error ? e.message : 'Failed to load product'
+        if (alive) setError(msg)
       } finally {
         if (alive) setLoading(false)
       }
@@ -251,7 +252,7 @@ export default function ProductPage() {
               { icon: '/Static/icons/Advanced.png', label: 'Advanced DSP Technology' },
             ].map((feature, idx) => (
               <div key={idx} className="flex flex-col items-center">
-                <img src={feature.icon} alt={feature.label} className="w-[50px] h-[50px]" />
+                <Image src={feature.icon} alt={feature.label} width={50} height={50} className="w-[50px] h-[50px]" />
                 <span className="text-sm text-center mt-[5px]">{feature.label}</span>
               </div>
             ))}

@@ -2,6 +2,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { randomUUID } from 'crypto'
+import { FALLBACK_PRODUCTS, ensureRuntimeProducts } from '../products/seed'
 
 const CART_COOKIE = 'cartId'
 const CART_COOKIE_MAX_AGE_DAYS = 30
@@ -22,16 +23,64 @@ function getOrCreateCartIdFromRequest(req: Request): { cartId: string; shouldSet
   return { cartId: randomUUID(), shouldSet: true }
 }
 
+// Runtime in-memory cart store: cartId -> (productId -> quantity)
+type RuntimeCart = Record<string, Record<number, number>>
+let RUNTIME_CARTS: RuntimeCart = Object.create(null)
+
+function getRuntimeCart(cartId: string): Record<number, number> {
+  if (!RUNTIME_CARTS[cartId]) RUNTIME_CARTS[cartId] = Object.create(null)
+  return RUNTIME_CARTS[cartId]
+}
+
+async function getProductById(productId: number) {
+  try {
+    const p = await prisma.product.findUnique({ where: { id: productId } })
+    if (p) return p
+  } catch (_) {
+    // ignore prisma errors in serverless
+  }
+  const store = ensureRuntimeProducts()
+  const runtime = store.find(p => p.id === productId)
+  if (runtime) return runtime
+  const fb = FALLBACK_PRODUCTS.find(p => p.id === productId)
+  return fb ?? null
+}
+
 export async function GET(req: Request) {
   const cartId = getCookieFromRequest(req, CART_COOKIE)
   if (!cartId) return NextResponse.json({ items: [], total: 0 })
 
-  const cart = await prisma.cart.findUnique({
-    where: { id: cartId },
-    include: { items: { include: { product: true } } },
-  })
-  const items = cart?.items ?? []
-  const total = items.reduce((sum, item) => sum + item.quantity * (item.product?.price ?? 0), 0)
+  try {
+    const cart = await prisma.cart.findUnique({
+      where: { id: cartId },
+      include: { items: { include: { product: true } } },
+    })
+    const items = cart?.items ?? []
+    if (items.length > 0) {
+      const total = items.reduce((sum: number, item: any) => sum + item.quantity * (item.product?.price ?? 0), 0)
+      return NextResponse.json({ items, total })
+    }
+  } catch (_) {
+    // fall back to runtime
+  }
+
+  // Runtime fallback
+  const map = getRuntimeCart(cartId)
+  const entries = Object.entries(map)
+  const mapped = await Promise.all(entries.map(async ([pidStr, qty]) => {
+    const productId = Number(pidStr)
+    const product = await getProductById(productId)
+    if (!product) return null
+    return {
+      id: productId,
+      cartId,
+      productId,
+      quantity: qty as number,
+      product,
+    }
+  }))
+  const items = (mapped.filter(Boolean) as Array<{ id: number; cartId: string; productId: number; quantity: number; product: any }>)
+  const total = items.reduce((sum: number, it: { quantity: number; product?: { price?: number } }) => sum + it.quantity * (it.product?.price ?? 0), 0)
   return NextResponse.json({ items, total })
 }
 
@@ -41,29 +90,48 @@ export async function POST(req: Request) {
   if (!productId || quantity < 1) return NextResponse.json({ error: 'Invalid input' }, { status: 400 })
 
   const { cartId, shouldSet } = getOrCreateCartIdFromRequest(req)
-  await prisma.cart.upsert({
-    where: { id: cartId },
-    update: {},
-    create: { id: cartId },
-  })
-
-  const item = await prisma.cartItem.upsert({
-    where: { cartId_productId: { cartId, productId } },
-    update: { quantity: { increment: quantity } },
-    create: { cartId, productId, quantity },
-  })
-
-  const res = NextResponse.json(item, { status: 201 })
-  if (shouldSet) {
-    res.cookies.set(CART_COOKIE, cartId, {
-      httpOnly: true,
-      sameSite: 'lax',
-      secure: process.env.NODE_ENV === 'production',
-      path: '/',
-      maxAge: CART_COOKIE_MAX_AGE_DAYS * 24 * 60 * 60,
+  try {
+    await prisma.cart.upsert({
+      where: { id: cartId },
+      update: {},
+      create: { id: cartId },
     })
+
+    const item = await prisma.cartItem.upsert({
+      where: { cartId_productId: { cartId, productId } },
+      update: { quantity: { increment: quantity } },
+      create: { cartId, productId, quantity },
+    })
+
+    const res = NextResponse.json(item, { status: 201 })
+    if (shouldSet) {
+      res.cookies.set(CART_COOKIE, cartId, {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+        path: '/',
+        maxAge: CART_COOKIE_MAX_AGE_DAYS * 24 * 60 * 60,
+      })
+    }
+    return res
+  } catch (_) {
+    // Runtime fallback
+    const prod = await getProductById(productId)
+    if (!prod) return NextResponse.json({ error: 'Invalid product' }, { status: 400 })
+    const map = getRuntimeCart(cartId)
+    map[productId] = (map[productId] ?? 0) + quantity
+    const res = NextResponse.json({ cartId, productId, quantity: map[productId] }, { status: 201 })
+    if (shouldSet) {
+      res.cookies.set(CART_COOKIE, cartId, {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+        path: '/',
+        maxAge: CART_COOKIE_MAX_AGE_DAYS * 24 * 60 * 60,
+      })
+    }
+    return res
   }
-  return res
 }
 
 export async function PATCH(req: Request) {
@@ -74,11 +142,17 @@ export async function PATCH(req: Request) {
   if (!productId || typeof quantity !== 'number' || quantity < 1) {
     return NextResponse.json({ error: 'Invalid input' }, { status: 400 })
   }
-  const item = await prisma.cartItem.update({
-    where: { cartId_productId: { cartId, productId } },
-    data: { quantity },
-  })
-  return NextResponse.json(item)
+  try {
+    const item = await prisma.cartItem.update({
+      where: { cartId_productId: { cartId, productId } },
+      data: { quantity },
+    })
+    return NextResponse.json(item)
+  } catch (_) {
+    const map = getRuntimeCart(cartId)
+    map[productId] = quantity
+    return NextResponse.json({ cartId, productId, quantity })
+  }
 }
 
 export async function DELETE(req: Request) {
@@ -87,8 +161,14 @@ export async function DELETE(req: Request) {
   const { searchParams } = new URL(req.url)
   const productId = Number(searchParams.get('productId'))
   if (!productId) return NextResponse.json({ error: 'Invalid productId' }, { status: 400 })
-  await prisma.cartItem.delete({ where: { cartId_productId: { cartId, productId } } })
-  return NextResponse.json({ ok: true })
+  try {
+    await prisma.cartItem.delete({ where: { cartId_productId: { cartId, productId } } })
+    return NextResponse.json({ ok: true })
+  } catch (_) {
+    const map = getRuntimeCart(cartId)
+    delete map[productId]
+    return NextResponse.json({ ok: true })
+  }
 }
 
 

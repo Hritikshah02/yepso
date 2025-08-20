@@ -6,13 +6,22 @@ export async function GET(_req: Request, ctx: any) {
   const slug = (ctx?.params?.slug ?? '') as string
   try {
     const product = await prisma.product.findUnique({ where: { slug } })
-    if (!product) return NextResponse.json({ error: 'Not found' }, { status: 404 })
-    return NextResponse.json(product)
-  } catch (e) {
-    // Fallback to seeded static data in serverless/read-only environments
+    if (product) return NextResponse.json(product)
+    // DB returned null -> try runtime store then static seeds
+    const store = ensureRuntimeProducts()
+    const runtimeItem = store.find(p => p.slug === slug)
+    if (runtimeItem) return NextResponse.json(runtimeItem)
     const fallback = FALLBACK_PRODUCTS.find(p => p.slug === slug)
-    if (!fallback) return NextResponse.json({ error: 'Not found' }, { status: 404 })
-    return NextResponse.json(fallback)
+    if (fallback) return NextResponse.json(fallback)
+    return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  } catch (e) {
+    // Fallback in serverless/read-only environments: runtime store first, then static seeds
+    const store = ensureRuntimeProducts()
+    const runtimeItem = store.find(p => p.slug === slug)
+    if (runtimeItem) return NextResponse.json(runtimeItem)
+    const fallback = FALLBACK_PRODUCTS.find(p => p.slug === slug)
+    if (fallback) return NextResponse.json(fallback)
+    return NextResponse.json({ error: 'Not found' }, { status: 404 })
   }
 }
 

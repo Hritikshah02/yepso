@@ -5,9 +5,35 @@ import { FALLBACK_PRODUCTS, ensureRuntimeProducts } from './seed'
 
 // List products (seeds defaults on first call)
 export async function GET(req: Request) {
+  const url = new URL(req.url)
+  const slug = url.searchParams.get('slug')?.trim() || ''
+  const includeInactive = url.searchParams.get('includeInactive') === 'true'
+
+  // Single product by slug
+  if (slug) {
+    try {
+      const product = await prisma.product.findUnique({ where: { slug } })
+      if (product) return NextResponse.json(product)
+      // DB returned null -> try runtime store then static seeds
+      const store = ensureRuntimeProducts()
+      const runtimeItem = store.find((p) => p.slug === slug)
+      if (runtimeItem) return NextResponse.json(runtimeItem)
+      const fallback = FALLBACK_PRODUCTS.find((p) => p.slug === slug)
+      if (fallback) return NextResponse.json(fallback)
+      return NextResponse.json({ error: 'Not found' }, { status: 404 })
+    } catch (e) {
+      // runtime store first
+      const store = ensureRuntimeProducts()
+      const runtimeItem = store.find((p) => p.slug === slug)
+      if (runtimeItem) return NextResponse.json(runtimeItem)
+      const fallback = FALLBACK_PRODUCTS.find((p) => p.slug === slug)
+      if (fallback) return NextResponse.json(fallback)
+      return NextResponse.json({ error: 'Not found' }, { status: 404 })
+    }
+  }
+
+  // List
   try {
-    const url = new URL(req.url)
-    const includeInactive = url.searchParams.get('includeInactive') === 'true'
     const products = await prisma.product.findMany({
       where: includeInactive ? {} : { active: true },
       include: { _count: { select: { cartItems: true } } },
@@ -16,11 +42,8 @@ export async function GET(req: Request) {
     return NextResponse.json(products)
   } catch (e) {
     console.error('[api/products] DB error', e)
-    // Avoid 500 in read-only/serverless env; return runtime store (or seeded fallback) and respect filters
-    const url = new URL(req.url)
-    const includeInactive = url.searchParams.get('includeInactive') === 'true'
     const store = ensureRuntimeProducts()
-    const filtered = includeInactive ? store : store.filter(p => p.active)
+    const filtered = includeInactive ? store : store.filter((p) => p.active)
     return NextResponse.json(filtered)
   }
 }
