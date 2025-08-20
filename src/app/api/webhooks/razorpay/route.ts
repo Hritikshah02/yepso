@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server'
-import { PrismaClient } from '@/generated/prisma'
+import { prisma } from '@/lib/prisma'
 import { createHmac } from 'crypto'
 import { sendOrderEmail } from '@/lib/email'
 
-const prisma = new PrismaClient()
+// use shared Prisma client
 
 export async function POST(req: Request) {
   const secret = process.env.RAZORPAY_WEBHOOK_SECRET
