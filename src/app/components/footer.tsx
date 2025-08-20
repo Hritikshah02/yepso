@@ -1,6 +1,8 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
+import { FOOTER_LOGO_URL } from '../../lib/assets';
 
 type ApiProduct = { slug: string; name: string; _count?: { cartItems: number }; createdAt?: string };
 
@@ -33,16 +35,13 @@ export default function Footer() {
         <div>
           <h3 className="font-bold text-lg mb-3 border-b pb-2">&nbsp;</h3>
           <div className="pt-1">
-            <img
+            <Image
+              src={FOOTER_LOGO_URL}
               alt="Logo"
-              loading="lazy"
               width={180}
               height={60}
-              decoding="async"
-              data-nimg="1"
-              srcSet="/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fimage.b1de5524.png&w=128&q=75 1x, /_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fimage.b1de5524.png&w=256&q=75 2x"
-              src="/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fimage.b1de5524.png&w=256&q=75"
-              style={{ color: 'transparent' }}
+              className="object-contain"
+              priority={false}
             />
           </div>
         </div>

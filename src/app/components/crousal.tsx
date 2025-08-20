@@ -22,29 +22,33 @@ const Carousel: React.FC<CarouselProps> = ({
   spaceBetween = 20,
 }) => {
   return (
-    <div className="w-full mx-auto bg-gray-600 h-30">
-      <Swiper
-        modules={[Navigation, Pagination, Autoplay]}
-        spaceBetween={spaceBetween}
-        slidesPerView={slidesPerView}
-        loop={true}
-        autoplay={{ delay: autoplayDelay }}
-        navigation
-        pagination={{ clickable: true }}
-        className="rounded-2xl shadow-lg w-100"
-      >
-        {images.map((src, index) => (
-          <SwiperSlide key={index}>
-            <Image
-              src={src}
-              alt={`Slide ${index + 1}`}
-              width={1000}
-              height={600}
-              className="w-full h-full object-cover rounded-2xl"
-            />
-          </SwiperSlide>
-        ))}
-      </Swiper>
+    <div className="w-full mx-auto">
+      <div className="relative w-full aspect-[16/9] md:aspect-[21/9] overflow-hidden rounded-2xl bg-white">
+        <Swiper
+          modules={[Navigation, Pagination, Autoplay]}
+          spaceBetween={spaceBetween}
+          slidesPerView={slidesPerView}
+          loop={true}
+          autoplay={{ delay: autoplayDelay }}
+          navigation
+          pagination={{ clickable: true }}
+          className="rounded-2xl shadow-lg h-full"
+        >
+          {images.map((src, index) => (
+            <SwiperSlide key={index}>
+              <div className="relative w-full h-full">
+                <Image
+                  src={src}
+                  alt={`Slide ${index + 1}`}
+                  fill
+                  className="object-contain"
+                  priority={index === 0}
+                />
+              </div>
+            </SwiperSlide>
+          ))}
+        </Swiper>
+      </div>
     </div>
   );
 };

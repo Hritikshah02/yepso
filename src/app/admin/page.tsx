@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import PromoBanner from "../components/prenavbar";
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
+import Image from "next/image";
+import Link from "next/link";
 
 type Product = {
   id: number;
@@ -286,16 +288,42 @@ export default function AdminDashboard() {
       <h2 className="text-lg font-medium mt-8 mb-3">Existing Products</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {products.map((p) => (
-          <div key={p.id} className="border rounded-lg p-3 bg-white shadow-sm flex flex-col">
-            {p.imageUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={p.imageUrl} alt={p.name} className="w-full h-40 object-cover rounded-md mb-3" />
-            ) : (
-              <div className="w-full h-40 bg-gray-100 rounded-md mb-3 grid place-items-center text-sm text-gray-500">No Image</div>
-            )}
-            <div className="flex-1">
-              <div className="font-semibold text-lg">{p.name}</div>
-              <div className="text-sm text-gray-600">
+          <div key={p.id} className="group relative shadow-lg rounded-xl bg-white overflow-hidden flex flex-col">
+            <div className="relative bg-[#EDEDED] h-72">
+              {p.imageUrl ? (
+                <Image
+                  src={p.imageUrl}
+                  alt={p.name}
+                  fill
+                  className="object-contain p-6 transition-transform duration-300 transform group-hover:scale-105"
+                  sizes="(max-width: 1024px) 50vw, 33vw"
+                />
+              ) : (
+                <div className="absolute inset-0 grid place-items-center text-sm text-gray-500">No Image</div>
+              )}
+
+              {typeof p.discountPercent === 'number' && (
+                <span className="absolute top-2 right-2 bg-red-600 text-white text-sm pb-1 rounded px-4">-{p.discountPercent}%</span>
+              )}
+
+              {/* Quick View overlay (no cart) */}
+              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-black/30 duration-500">
+                <Link
+                  href={`/products/${p.slug}`}
+                  className="relative flex items-center justify-center w-44 h-11 bg-white text-black rounded-full transition-all duration-300 hover:bg-gray-800 hover:text-white"
+                >
+                  Quick View
+                </Link>
+              </div>
+            </div>
+
+            <div className="border-t-[3px] border-b-[3px] border-red-600 text-base font-medium px-4 py-2">
+              {p.active ? 'Active' : 'Inactive'}
+            </div>
+
+            <div className="px-4 py-3">
+              <h3 className="text-lg font-semibold">{p.name}</h3>
+              <div className="text-sm text-gray-600 break-all">
                 {(p.discountPercent ?? 0) > 0 ? (
                   <>
                     <span className="line-through text-gray-400 mr-2">₹{p.price}</span>
@@ -304,13 +332,12 @@ export default function AdminDashboard() {
                 ) : (
                   <>₹{p.price}</>
                 )}
-                 · <span className="break-all">{p.slug}</span>
+                {' '}
+                · <span>{p.slug}</span>
               </div>
-              {p.discountPercent != null && (
-                <div className="mt-1 inline-flex items-center px-2 py-0.5 rounded bg-red-600/10 text-red-700 text-xs">-{p.discountPercent}%</div>
-              )}
             </div>
-            <div className="mt-3 flex items-center justify-between gap-2">
+
+            <div className="px-4 pb-4 flex items-center justify-between gap-2">
               <button
                 onClick={() => toggleActive(p.slug, !(p.active ?? true))}
                 className={`px-3 py-1 rounded text-sm border ${p.active ? 'bg-green-600 text-white border-green-700' : 'bg-gray-100 text-gray-700 border-gray-300'}`}

@@ -166,17 +166,17 @@ export default function ScrollCards() {
             <div
               key={`${card.id}-${card.card_title}-${index}`}
               data-api-index={card.apiIndex}
-              className="relative w-[400px] h-[300px] rounded-xl bg-red-50 shadow-lg overflow-hidden group card lg:gap-10"
+              className="relative w-[400px] h-[300px] rounded-xl bg-white shadow-lg overflow-hidden group card lg:gap-10"
               ref={(el) => { if (el) cardRefs.current[index] = el; }}
             >
               {/* Main Image: Render only if a valid URL exists */}
-              <div className="relative w-full h-full">
+              <div className="relative w-full h-full bg-white">
                 {card.card_image ? (
                   <Image
                     src={card.card_image}
                     alt={card.card_title}
                     fill
-                    className="rounded-xl object-cover"
+                    className="rounded-xl object-contain"
                     sizes="(max-width: 768px) 100vw, 400px"
                   />
                 ) : null}

@@ -5,24 +5,19 @@ import VoltageEngineer from './components/section2';
 import Buttonstxt from './components/Buttons';
 import AboutYepso from './components/about';
 import  ResponsiveCarousel from './components/crousal';
+import { HOME_CAROUSEL_IMAGES, HOME_PROMO_IMAGE_URL } from '../lib/assets';
 import Cards from "./components/Card_copy";
 import Image from 'next/image';
 
 
 const HomePage = () => {
-  const images = [
-    "/Static/Crousal/landing/Landing Page Banner1.png",
-    "/Static/Crousal/landing/Landing Page Banner1.png",
-    "/Static/Crousal/landing/Landing Page Banner1.png",
-  ];
-
   return (
     
     <div >
       <PromoBanner />
       <Navbar/>
       <ResponsiveCarousel 
-      images={images} 
+      images={HOME_CAROUSEL_IMAGES} 
         autoplayDelay={5000} 
         slidesPerView={1} 
         spaceBetween={30}/>
@@ -30,15 +25,15 @@ const HomePage = () => {
       < Cards />
       < AboutYepso />
       <div>
-      <Image
-        src="/Static/Image/image.png" // The path is relative to the /public folder
-        height={100}
-        width={100}
-        alt="Description of image"
-         className="object-contain w-full h-full p-10"
-         quality={100}
-      />
-    </div>
+        <Image
+          src={HOME_PROMO_IMAGE_URL}
+          height={100}
+          width={100}
+          alt="Description of image"
+          className="object-contain w-full h-full p-10"
+          quality={100}
+        />
+      </div>
       <Footer />
 
     </div>

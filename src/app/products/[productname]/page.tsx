@@ -14,6 +14,7 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import { Navigation, Pagination, Autoplay } from 'swiper/modules';
+import Image from 'next/image';
 
 // Suggestion list will be fetched dynamically; removed static placeholders
 
@@ -140,11 +141,13 @@ export default function ProductPage() {
             slidesPerView={1}
             autoplay={{ delay: 3000 }}
             onSwiper={(swiper) => setSwiperRef(swiper)}
-            className="w-full lg:aspect-video sm:aspect-auto rounded-lg overflow-hidden"
+            className="w-full rounded-lg overflow-hidden"
           >
             {productImages.map((img: string, index: number) => (
               <SwiperSlide key={index}>
-                <img src={img} alt={`Product Image ${index + 1}`} className="w-full h-full object-cover" />
+                <div className="relative w-full aspect-[16/9]">
+                  <Image src={img} alt={`Product Image ${index + 1}`} fill className="object-contain bg-white" priority={index === 0} />
+                </div>
               </SwiperSlide>
             ))}
           </Swiper>
@@ -155,9 +158,9 @@ export default function ProductPage() {
               <button
                 key={index}
                 onClick={() => swiperRef?.slideTo(index)}
-                className={`flex border rounded-lg overflow-hidden h-24 w-24`}
+                className={`flex border rounded-lg overflow-hidden h-24 w-24 bg-white`}
               >
-                <img src={img} alt={`Thumbnail ${index + 1}`} className="h-24 w-24 object-cover" />
+                <Image src={img} alt={`Thumbnail ${index + 1}`} width={96} height={96} className="object-contain" />
               </button>
             ))}
           </div>

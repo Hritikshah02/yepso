@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { Menu, X, Search, User, ShoppingBag } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import Logo from "../../../public/Static/Logo/image.png"
+import { NAV_LOGO_URL } from '../../lib/assets';
 import { useCart } from '../context/CartContext';
 
 export default function Navbar() {
@@ -34,7 +34,7 @@ export default function Navbar() {
 
         {/* Logo (left-aligned) */}
         <div className="flex items-center space-x-2">
-          <Image src={Logo} alt="Logo" width={120} height={40} />
+          <Image src={NAV_LOGO_URL} alt="Logo" width={120} height={40} />
         </div>
 
         {/* Centered Menu */}

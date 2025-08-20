@@ -1,0 +1,40 @@
+// Centralized assets with Cloudinary support via env vars
+// Provide env overrides for production Cloudinary URLs; fall back to local public assets
+
+export const FOOTER_LOGO_URL =
+  process.env.NEXT_PUBLIC_FOOTER_LOGO_URL || 
+  "/Static/Logo/image.png";
+
+export const NAV_LOGO_URL =
+  process.env.NEXT_PUBLIC_NAV_LOGO_URL ||
+  "/Static/Logo/image.png";
+
+export const HOME_PROMO_IMAGE_URL =
+  process.env.NEXT_PUBLIC_HOME_PROMO_IMAGE_URL ||
+  "/Static/Image/image.png";
+
+function envList(name: string): string[] {
+  const raw = process.env[name];
+  if (!raw) return [];
+  return raw.split(",").map((s) => s.trim()).filter(Boolean);
+}
+
+export const HOME_CAROUSEL_IMAGES: string[] = (() => {
+  const fromEnv = envList("NEXT_PUBLIC_HOME_CAROUSEL");
+  if (fromEnv.length) return fromEnv;
+  return [
+    "/Static/Crousal/landing/Landing Page Banner1.png",
+    "/Static/Crousal/landing/Landing Page Banner1.png",
+    "/Static/Crousal/landing/Landing Page Banner1.png",
+  ];
+})();
+
+export const PRODUCT_CAROUSEL_IMAGES: string[] = (() => {
+  const fromEnv = envList("NEXT_PUBLIC_PRODUCT_CAROUSEL");
+  if (fromEnv.length) return fromEnv;
+  return [
+    "/Static/Crousal/product/slide-1.jpg",
+    "/Static/Crousal/product/slide-2.jpg",
+    "/Static/Crousal/product/slide-3.png",
+  ];
+})();
