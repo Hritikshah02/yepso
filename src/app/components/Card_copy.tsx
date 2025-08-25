@@ -1,6 +1,11 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
+import QuantityControls from "../products/components/QuantityControls";
+import "@fortawesome/fontawesome-free/css/all.min.css";
+
+const toSlug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
 type CatalogCard = {
   id: string | number;
@@ -8,6 +13,7 @@ type CatalogCard = {
   card_image?: string | null;
   product_image?: string | null;
   apiIndex: number;
+  slug?: string;
 };
 
 type ApiProduct = {
@@ -77,6 +83,7 @@ export default function ScrollCards() {
                 card_image: p.imageUrl || '/placeholder.svg',
                 product_image: p.imageUrl || null,
                 apiIndex: idx,
+                slug: p.slug,
               });
             });
           });
@@ -162,47 +169,61 @@ export default function ScrollCards() {
           {!loading && allCards.length === 0 && (
             <div className="text-gray-600">No items found. Check the <a className="underline" href="/api/catalogs">/api/catalogs</a> response and backend endpoints.</div>
           )}
-          {!loading && allCards.length > 0 && allCards.map((card, index) => (
-            <div
-              key={`${card.id}-${card.card_title}-${index}`}
-              data-api-index={card.apiIndex}
-              className="relative w-[400px] h-[300px] rounded-xl bg-white shadow-lg overflow-hidden group card lg:gap-10"
-              ref={(el) => { if (el) cardRefs.current[index] = el; }}
-            >
-              {/* Main Image: Render only if a valid URL exists */}
-              <div className="relative w-full h-full bg-white">
-                {card.card_image ? (
-                  <Image
-                    src={card.card_image}
-                    alt={card.card_title}
-                    fill
-                    className="rounded-xl object-contain"
-                    sizes="(max-width: 768px) 100vw, 400px"
-                  />
-                ) : null}
-              </div>
-
-              {/* Small Product Image Overlay: Render only if product_image exists */}
-              {card.product_image && (
-                <div className="absolute bottom-3 right-3 w-20 h-14">
-                  <Image
-                    src={card.product_image || ""}
-                    alt="Product"
-                    width={80}
-                    height={56}
-                    className="rounded-md shadow-md object-contain"
-                  />
+          {!loading && allCards.length > 0 && allCards.map((card, index) => {
+            const slug = card.slug || toSlug(card.card_title);
+            return (
+              <div
+                key={`${card.id}-${card.card_title}-${index}`}
+                data-api-index={card.apiIndex}
+                className="relative w-[400px] h-[300px] rounded-xl bg-white shadow-lg overflow-hidden group card lg:gap-10"
+                ref={(el) => { if (el) cardRefs.current[index] = el; }}
+              >
+                {/* Main Image: Render only if a valid URL exists */}
+                <div className="relative w-full h-full bg-white">
+                  {card.card_image ? (
+                    <Image
+                      src={card.card_image}
+                      alt={card.card_title}
+                      fill
+                      className="rounded-xl object-contain"
+                      sizes="(max-width: 768px) 100vw, 400px"
+                    />
+                  ) : null}
                 </div>
-              )}
 
-              {/* Title Section */}
-              <div className="absolute bottom-0 left-0 w-full bg-white p-2">
-                <p className="text-gray-800 font-semibold text-xl px-4 rounded-lg border-solid">
-                  {card.card_title}
-                </p>
+                {/* Hover overlay with Quick View and Add to Cart */}
+                <div className="absolute inset-0 flex flex-col justify-center items-center opacity-0 group-hover:opacity-100 bg-black/30 duration-500">
+                  <Link href={`/products/${slug}`} className="relative flex items-center justify-center w-44 h-11 bg-white text-black rounded-full mx-2 mb-2 transition-all duration-300 hover:bg-gray-800 hover:text-white group/button">
+                    <span className="group-hover/button:opacity-0 transition-opacity duration-200">Quick View</span>
+                    <i className="fa-solid fa-eye absolute opacity-0 group-hover/button:opacity-100 transition-opacity duration-200"></i>
+                  </Link>
+                  <div className="relative flex items-center justify-center mx-2 mt-2">
+                    <QuantityControls slug={slug} title={card.card_title} />
+                  </div>
+                </div>
+
+                {/* Small Product Image Overlay: Render only if product_image exists */}
+                {card.product_image && (
+                  <div className="absolute bottom-3 right-3 w-20 h-14">
+                    <Image
+                      src={card.product_image || ""}
+                      alt="Product"
+                      width={80}
+                      height={56}
+                      className="rounded-md shadow-md object-contain"
+                    />
+                  </div>
+                )}
+
+                {/* Title Section */}
+                <div className="absolute bottom-0 left-0 w-full bg-white p-2">
+                  <p className="text-gray-800 font-semibold text-xl px-4 rounded-lg border-solid">
+                    {card.card_title}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       </div>
     </main>
