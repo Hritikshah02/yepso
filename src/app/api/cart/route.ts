@@ -57,7 +57,13 @@ export async function GET(req: Request) {
     })
     const items = cart?.items ?? []
     if (items.length > 0) {
-      const total = items.reduce((sum: number, item: any) => sum + item.quantity * (item.product?.price ?? 0), 0)
+      // Include discountPercent in subtotal; match UI logic which rounds per-unit discounted price
+      const total = items.reduce((sum: number, item: any) => {
+        const price = item.product?.price ?? 0
+        const discount = item.product?.discountPercent ?? 0
+        const unit = Math.round(price * (1 - discount / 100))
+        return sum + unit * item.quantity
+      }, 0)
       return NextResponse.json({ items, total })
     }
   } catch (_) {
@@ -80,7 +86,13 @@ export async function GET(req: Request) {
     }
   }))
   const items = (mapped.filter(Boolean) as Array<{ id: number; cartId: string; productId: number; quantity: number; product: any }>)
-  const total = items.reduce((sum: number, it: { quantity: number; product?: { price?: number } }) => sum + it.quantity * (it.product?.price ?? 0), 0)
+  // Include discountPercent in subtotal for runtime fallback as well
+  const total = items.reduce((sum: number, it: { quantity: number; product?: { price?: number; discountPercent?: number } }) => {
+    const price = it.product?.price ?? 0
+    const discount = it.product?.discountPercent ?? 0
+    const unit = Math.round(price * (1 - discount / 100))
+    return sum + unit * it.quantity
+  }, 0)
   return NextResponse.json({ items, total })
 }
 

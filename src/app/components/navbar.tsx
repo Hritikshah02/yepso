@@ -67,9 +67,22 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Mobile Menu Button */}
-        <div className="md:hidden">
-          <button onClick={() => setIsOpen(!isOpen)}>
+        {/* Mobile Right Controls */}
+        <div className="md:hidden flex items-center gap-3">
+          {/* Icons */}
+          <div className="flex space-x-4 items-center">
+            {/* Keep account as icon only to match desktop behavior (no /account route) */}
+            <User className="text-black" aria-label="Account" />
+            <Link href="/cart" className="relative" aria-label="Cart">
+              <ShoppingBag className="text-black cursor-pointer" />
+              {count > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full px-1 min-w-5 text-center">
+                  {count}
+                </span>
+              )}
+            </Link>
+          </div>
+          <button onClick={() => setIsOpen(!isOpen)} aria-label={isOpen ? 'Close menu' : 'Open menu'}>
             {isOpen ? <X size={28} /> : <Menu size={28} />}
           </button>
         </div>
@@ -90,19 +103,6 @@ export default function Navbar() {
               className="pl-10 pr-4 py-2 border rounded-md w-full focus:ring focus:ring-red-200"
             />
             <Search className="absolute left-3 top-2.5 text-gray-500" size={16} />
-          </div>
-
-          {/* Icons */}
-          <div className="flex space-x-4 items-center">
-            <User className="text-black cursor-pointer" />
-            <Link href="/cart" className="relative">
-              <ShoppingBag className="text-black cursor-pointer" />
-              {count > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full px-1 min-w-5 text-center">
-                  {count}
-                </span>
-              )}
-            </Link>
           </div>
         </div>
       )}

@@ -17,7 +17,7 @@ const ProductCardDetailed = ({ image, hoverImage, discount, title, reviews, pric
   const originalPrice = hasDiscount && (1 - pct / 100) > 0 ? Math.round(price / (1 - pct / 100)) : null
   return (
     <div className="group relative shadow-lg rounded-xl bg-white mx-auto w-full h-full overflow-hidden">
-      <div className="relative bg-[#EDEDED] h-80">
+      <div className="relative bg-[#EDEDED] h-64 sm:h-72 md:h-80">
         {/* Main Image */}
         {image && (
           <Image
@@ -25,7 +25,7 @@ const ProductCardDetailed = ({ image, hoverImage, discount, title, reviews, pric
             alt={title}
             fill
             sizes="(max-width: 1200px) 33vw, 400px"
-            className="object-contain p-6 transition-transform duration-300 transform group-hover:scale-105"
+            className="object-contain p-4 sm:p-6 transition-transform duration-300 transform group-hover:scale-105"
           />
         )}
 
@@ -36,7 +36,7 @@ const ProductCardDetailed = ({ image, hoverImage, discount, title, reviews, pric
             alt={title}
             fill
             sizes="(max-width: 1200px) 33vw, 400px"
-            className="absolute inset-0 object-contain p-6 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+            className="absolute inset-0 object-contain p-4 sm:p-6 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
           />
         )}
 
@@ -66,12 +66,12 @@ const ProductCardDetailed = ({ image, hoverImage, discount, title, reviews, pric
       <div className="border-t-[3px] border-b-[3px] border-red-600 text-base md:text-lg font-medium px-4 py-2">
         SALES END IN: {timer}
       </div>
-      <p className="text-gray-500 text-sm mt-2 px-4">
+      <p className="text-gray-500 text-xs sm:text-sm mt-2 px-4">
         ⭐ ⭐ ⭐ ⭐ ⭐ ({reviews} Reviews)
       </p>
-      <h3 className="text-xl md:text-2xl font-semibold px-4">{title}</h3>
+      <h3 className="text-lg sm:text-xl md:text-2xl font-semibold px-4">{title}</h3>
       <div className="flex items-center justify-between px-4 pb-3">
-        <p className="text-red-600 font-bold text-lg md:text-xl">
+        <p className="text-red-600 font-bold text-base sm:text-lg md:text-xl">
           {hasDiscount && originalPrice ? (
             <>
               <span className="line-through text-gray-400 mr-2">Rs {originalPrice}</span>

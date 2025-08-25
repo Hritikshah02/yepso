@@ -28,34 +28,35 @@ export default function Footer() {
   }, []);
 
   return (
-    <footer className="bg-gray-100 py-10 px-5 md:px-10">
-      <div className="container mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 text-black">
+    <footer className="bg-gray-100 py-6 sm:py-8 md:py-10 px-4 sm:px-6 md:px-10">
+      <div className="container mx-auto grid grid-cols-1 md:grid-cols-4 gap-6 sm:gap-8 text-black">
 
         {/* Logo */}
         <div>
           <h3 className="font-bold text-lg mb-3 border-b pb-2">&nbsp;</h3>
           <div className="pt-1">
-            <Image
-              src={FOOTER_LOGO_URL}
-              alt="Logo"
-              width={180}
-              height={60}
-              className="object-contain"
-              priority={false}
-            />
+            <div className="relative w-[140px] sm:w-[180px] h-[40px] sm:h-[60px]">
+              <Image
+                src={FOOTER_LOGO_URL}
+                alt="Logo"
+                fill
+                className="object-contain"
+                priority={false}
+              />
+            </div>
           </div>
         </div>
 
         {/* Products */}
         <div>
           <h3
-            className="font-bold text-lg mb-3 cursor-pointer border-b pb-2"
+            className="font-bold text-base sm:text-lg mb-3 cursor-pointer border-b pb-2"
             onClick={() => setOpenProduct(!openProduct)}
           >
             Products
           </h3>
           {/* Display only on small screens */}
-          <ul className={`${openProduct ? 'block' : 'hidden'} md:block space-y-2`}>
+          <ul className={`${openProduct ? 'block' : 'hidden'} md:block space-y-1.5 sm:space-y-2`}>
             {topProducts.length > 0 ? (
               topProducts.map((p) => (
                 <li key={p.slug}>
@@ -75,40 +76,40 @@ export default function Footer() {
         {/* Quick Links */}
         <div>
           <h3
-            className="font-bold text-lg mb-3 cursor-pointer border-b pb-2"
+            className="font-bold text-base sm:text-lg mb-3 cursor-pointer border-b pb-2"
             onClick={() => setOpenQuickLinks(!openQuickLinks)}
           >
             Quick Links
           </h3>
           {/* Display only on small screens */}
-          <ul className={`${openQuickLinks ? 'block' : 'hidden'} md:block space-y-2`}>
+          <ul className={`${openQuickLinks ? 'block' : 'hidden'} md:block space-y-1.5 sm:space-y-2`}>
             <li><Link href="/" className="hover:text-red-600">Home</Link></li>
             <li><Link href="/products" className="hover:text-red-600">Products</Link></li>
-            <li><Link href="/contact" className="hover:text-red-600">Contact Us</Link></li>
+            <li><Link href="/contactUs" className="hover:text-red-600">Contact Us</Link></li>
           </ul>
         </div>
 
         {/* Connect With Us */}
         <div>
           <h3
-            className="font-bold text-lg mb-3 cursor-pointer border-b pb-2"
+            className="font-bold text-base sm:text-lg mb-3 cursor-pointer border-b pb-2"
             onClick={() => setOpenConnect(!openConnect)}
           >
             Connect With Us
           </h3>
           {/* Display only on small screens */}
           <div className={`${openConnect ? 'block' : 'hidden'} md:block`}>
-            <div className="flex items-center space-x-2 mb-2">
+            <div className="flex items-center space-x-2 mb-2 text-sm sm:text-base">
               <i className="text-green-500 fa-brands fa-whatsapp"></i>
               <span>+91 44444 44444</span>
             </div>
-            <div className="flex items-center space-x-2 mb-4">
+            <div className="flex items-center space-x-2 mb-4 text-sm sm:text-base">
               <i className="text-green-500 fa-brands fa-solid fa-envelope"></i>
               <span>xyz@gmail.com</span>
             </div>
-            <h3 className="font-bold text-lg mb-3 sm:hidden md:grid">Follow Us</h3>
-            {/* Follow Us icons - changed to grid for medium devices and larger */}
-            <div className="flex sm:grid md:grid-cols-5 gap-4 text-xl sm:hidden md:flex">
+            <h3 className="hidden md:block font-bold text-lg mb-3">Follow Us</h3>
+            {/* Follow Us icons - show md+ only */}
+            <div className="hidden md:flex md:grid-cols-5 gap-4 text-lg md:text-xl">
               <a href="#" className="text-blue-600 hover:text-blue-800"><i className="fa-brands fa-facebook"></i></a>
               <a href="#" className="text-black hover:text-gray-800"><i className="fa-brands fa-x-twitter"></i></a>
               <a href="#" className="text-pink-600 hover:text-pink-800"><i className="fa-brands fa-instagram"></i></a>
@@ -120,11 +121,11 @@ export default function Footer() {
 
       </div>
 
-      {/* Follow Us Section */}
-      <div className=" py-2 lg:hidden">
+      {/* Follow Us Section - phones only (hide from md and up) */}
+      <div className=" py-2 md:hidden">
         <div className="container mx-auto">
-          <h3 className="font-bold text-lg mb-3 text-black">Follow Us</h3>
-          <div className="flex space-x-4 text-xl">
+          <h3 className="font-bold text-base sm:text-lg mb-3 text-black">Follow Us</h3>
+          <div className="flex space-x-4 text-lg sm:text-xl">
             <a href="#" className="text-blue-600 hover:text-blue-800"><i className="fa-brands fa-facebook"></i></a>
             <a href="#" className="text-black hover:text-gray-800"><i className="fa-brands fa-x-twitter"></i></a>
             <a href="#" className="text-pink-600 hover:text-pink-800"><i className="fa-brands fa-instagram"></i></a>

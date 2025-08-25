@@ -6,6 +6,7 @@ import { useCart } from '../context/CartContext'
 import PromoBanner from '../components/prenavbar'
 import Navbar from '../components/navbar'
 import Footer from '../components/footer'
+import { Trash2 } from 'lucide-react'
 
 interface CartProduct {
   id: number
@@ -91,46 +92,42 @@ export default function CartPage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 space-y-4">
                 {items.map((item) => (
-                  <div key={item.id} className="flex items-center justify-between border rounded-lg p-4 bg-white">
+                  <div key={item.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between border rounded-lg p-3 sm:p-4 bg-white gap-3">
                     <div className="flex items-center gap-4">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={item.product.imageUrl ?? 'https://res.cloudinary.com/demo/image/upload/f_auto,q_auto/sample'} alt={item.product.name} className="w-20 h-20 object-cover rounded" />
+                      <img src={item.product.imageUrl ?? 'https://res.cloudinary.com/demo/image/upload/f_auto,q_auto/sample'} alt={item.product.name} className="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded" />
                       <div>
                         <div className="font-semibold">{item.product.name}</div>
-                        <div className="text-gray-600">
-                          {((item.product.discountPercent ?? 0) > 0) ? (
-                            <>
-                              <span className="line-through text-gray-400 mr-2">Rs {item.product.price}</span>
-                              Rs {Math.round(item.product.price * (1 - (item.product.discountPercent ?? 0) / 100))}
-                            </>
-                          ) : (
-                            <>Rs {item.product.price}</>
-                          )}
-                        </div>
+                        {((item.product.discountPercent ?? 0) > 0) && (
+                          <span className="inline-block mt-1 bg-green-100 text-green-700 text-[10px] font-medium px-1.5 py-0.5 rounded whitespace-nowrap">Save {item.product.discountPercent}%</span>
+                        )}
                       </div>
                     </div>
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2 sm:gap-4 flex-wrap sm:flex-nowrap w-full sm:w-auto justify-between sm:justify-end">
                       <div className="flex items-center gap-2">
                         <button
-                          className="px-3 py-1 border rounded"
+                          className="px-2 sm:px-3 py-1 border rounded"
                           onClick={() => item.quantity > 1 ? updateQty(item.productId, item.quantity - 1) : removeItem(item.productId)}
                         >
                           -
                         </button>
                         <span className="min-w-6 text-center">{item.quantity}</span>
-                        <button className="px-3 py-1 border rounded" onClick={() => updateQty(item.productId, item.quantity + 1)}>+</button>
+                        <button className="px-2 sm:px-3 py-1 border rounded" onClick={() => updateQty(item.productId, item.quantity + 1)}>+</button>
                       </div>
-                      <div className="w-32 text-right font-medium">
+                      <div className="ml-auto text-right font-medium w-auto sm:w-32">
                         {((item.product.discountPercent ?? 0) > 0) ? (
                           <>
-                            <span className="line-through text-gray-400 mr-2">Rs {item.product.price * item.quantity}</span>
+                            <span className="inline line-through text-gray-400 mr-2 text-xs">Rs {item.product.price * item.quantity}</span>
                             Rs {Math.round(item.product.price * (1 - (item.product.discountPercent ?? 0) / 100)) * item.quantity}
                           </>
                         ) : (
                           <>Rs {item.product.price * item.quantity}</>
                         )}
                       </div>
-                      <button className="text-red-600 hover:underline" onClick={() => removeItem(item.productId)}>Remove</button>
+                      <button className="hidden sm:inline text-red-600 hover:underline" onClick={() => removeItem(item.productId)}>Remove</button>
+                      <button className="sm:hidden p-2 text-red-600 hover:text-red-700" aria-label="Remove item" onClick={() => removeItem(item.productId)}>
+                        <Trash2 size={16} />
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -139,6 +136,7 @@ export default function CartPage() {
                 <div className="flex justify-between mb-2"><span>Subtotal</span><span>Rs {total}</span></div>
                 <div className="text-sm text-gray-500 mb-4">Taxes and shipping calculated at checkout.</div>
                 <Link href="/checkout" className="block text-center w-full bg-black text-white py-2 rounded-lg">Proceed to Checkout</Link>
+                <Link href="/products" className="block text-center w-full mt-2 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">Add more items</Link>
                 <button className="w-full mt-2 text-red-600 py-2 border border-red-300 rounded-lg" onClick={clearCart}>Clear Cart</button>
               </aside>
             </div>

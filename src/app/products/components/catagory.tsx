@@ -53,10 +53,10 @@ const SolorBanner: React.FC<PromoBannerProps> = ({ image, discountText, title, b
 
 const Categories: React.FC = () => {
   return (
-    <div className="px-4 sm:px-6 md:px-12 py-10">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 items-center gap-6 mt-6 text-black">
+    <div className="px-4 sm:px-6 md:px-12 py-8 sm:py-10">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 items-center gap-5 sm:gap-6 mt-6 text-black">
         <div className="flex flex-col lg:flex-col mb-4 border-b pb-4">
-          <h1 className="text-5xl font-bold border-b-[5px] border-red-600 pb-4 leading-[3.5rem]">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold border-b-[5px] border-red-600 pb-3 sm:pb-4 leading-tight sm:leading-[3.5rem]">
             Shop by <br /> Categories
           </h1>
           <div className="flex-col items-center gap-4">
@@ -67,11 +67,11 @@ const Categories: React.FC = () => {
                 width={150}
                 height={50}
               />
-              <p className="text-lg font-semibold text-left">
+              <p className="text-sm sm:text-base font-semibold text-left">
                 10+ <br /> New Products
               </p>
             </div>
-            <Link href="/products" className=" font-semibold text-xl flex items-center gap-2">
+            <Link href="/products" className=" font-semibold text-base sm:text-lg flex items-center gap-2">
               <span className="border-b-[3px] border-b-red-600 pb-1 pr-2">All Categories →</span>
             </Link>
           </div>
