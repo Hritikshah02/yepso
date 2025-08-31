@@ -7,7 +7,6 @@ import AboutYepso from './components/about';
 import  ResponsiveCarousel from './components/crousal';
 import { HOME_CAROUSEL_IMAGES, HOME_PROMO_IMAGE_URL } from '../lib/assets';
 import Cards from "./components/Card_copy";
-import Image from 'next/image';
 
 
 const HomePage = () => {
@@ -25,13 +24,12 @@ const HomePage = () => {
       < Cards />
       < AboutYepso />
       <div>
-        <Image
+        <img
           src={HOME_PROMO_IMAGE_URL}
-          height={100}
-          width={100}
           alt="Description of image"
-          className="object-contain w-full h-full p-10"
-          quality={100}
+          className="object-contain p-10 h-auto w-auto max-w-full"
+          loading="lazy"
+          decoding="async"
         />
       </div>
       <Footer />

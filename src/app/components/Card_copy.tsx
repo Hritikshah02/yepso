@@ -48,6 +48,12 @@ export default function ScrollCards() {
   const [activeApiIndex, setActiveApiIndex] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
   const [labels, setLabels] = useState<string[]>(["New Drops", "Inverter", "AIO Lithium", "AC Stabiliser"]);
+  // Ignore observer updates during programmatic scroll to prevent highlight jumping
+  const isProgrammaticScrollRef = useRef<boolean>(false);
+  const scrollEndTimerRef = useRef<number | null>(null);
+  // Guard against accidental tab selection during horizontal pan
+  const draggingRef = useRef(false);
+  const startRef = useRef<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
     const getData = async () => {
@@ -115,6 +121,7 @@ export default function ScrollCards() {
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
+        if (isProgrammaticScrollRef.current) return; // don't override user selection mid-scroll
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             const el = entry.target as HTMLElement;
@@ -138,23 +145,44 @@ export default function ScrollCards() {
       const containerWidth = container.clientWidth;
       const cardLeftOffset = cardElement.offsetLeft;
       const scrollLeft = Math.max(0, cardLeftOffset - containerWidth / 2 + cardElement.clientWidth / 2);
-      container.scrollTo({ left: scrollLeft, behavior: "smooth" });
+      // Mark as programmatic scroll, set active immediately, then clear when scroll settles
+      isProgrammaticScrollRef.current = true;
       setActiveApiIndex(index);
+      container.scrollTo({ left: scrollLeft, behavior: "smooth" });
+      if (scrollEndTimerRef.current) window.clearTimeout(scrollEndTimerRef.current);
+      // Debounce: after scrolling stops (~150ms without scroll events), re-enable observer updates
+      const onScroll = () => {
+        if (scrollEndTimerRef.current) window.clearTimeout(scrollEndTimerRef.current);
+        scrollEndTimerRef.current = window.setTimeout(() => {
+          isProgrammaticScrollRef.current = false;
+          container.removeEventListener('scroll', onScroll);
+        }, 150);
+      };
+      container.addEventListener('scroll', onScroll);
     }
   };
 
   return (
     <main className="w-screen max-w-none h-full flex items-center justify-center py-8 px-0 flex-col">
-      <div className="flex flex-row justify-start items-center whitespace-nowrap overflow-x-auto w-full px-4 lg:px-8 gap-6">
+      <div
+        className="flex flex-row justify-start items-center whitespace-nowrap overflow-x-auto w-full px-4 lg:px-8 gap-6 select-none"
+        style={{ touchAction: 'pan-x' }}
+        onPointerDown={(e) => { startRef.current = { x: e.clientX, y: e.clientY }; draggingRef.current = false; }}
+        onPointerMove={(e) => {
+          const s = startRef.current; if (!s) return;
+          if (Math.abs(e.clientX - s.x) > 8 || Math.abs(e.clientY - s.y) > 8) draggingRef.current = true;
+        }}
+        onPointerUp={() => { setTimeout(() => { draggingRef.current = false; startRef.current = null; }, 50); }}
+      >
         {labels.map((label, index) => (
           <button
             key={index}
-            onClick={() => handleScrollToCategory(index)}
-            className={`px-5 py-2 gap-15 rounded-full transition-all text-sm font-semibold whitespace-nowrap lg:px-10 ${
+            onClick={(e) => { if (draggingRef.current) { e.preventDefault(); e.stopPropagation(); return; } handleScrollToCategory(index); }}
+            className={`px-5 py-2 gap-15 rounded-full transition-colors text-sm font-semibold whitespace-nowrap lg:px-10 ${
               activeApiIndex === index
                 ? "bg-red-600 text-white"
                 : "text-black hover:text-gray-600"
-            }`}
+              }`}
           >
             {label}
           </button>

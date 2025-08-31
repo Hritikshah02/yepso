@@ -141,7 +141,7 @@ const ProductCatalogue: React.FC<{ tabs: TabKey[]; useDetailedCards?: boolean }>
   };
 
   return (
-    <div className="px-4 sm:px-6 md:px-12 py-8 sm:py-10 max-w-7xl mx-auto">
+    <div id="catalog" className="px-4 sm:px-6 md:px-12 py-8 sm:py-10 max-w-7xl mx-auto">
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-4 border-b pb-4">
         <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-black">Catalogue<div className="w-1/2 sm:w-2/3 lg:w-[60%] h-[3px] bg-red-600 mt-3 sm:mt-4"></div></h2>
         <Tabs tabs={tabs} selectedTab={selectedTab} onTabClick={handleTabClick} />

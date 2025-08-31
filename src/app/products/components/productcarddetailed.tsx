@@ -5,8 +5,9 @@ import { useMemo, useState } from "react";
 import { useCart } from "../../context/CartContext";
 import "@fortawesome/fontawesome-free/css/all.min.css"; // Import Font Awesome
 import QuantityControls from "./QuantityControls";
+import type { StaticImageData } from "next/image";
 
-type Props = { image: string; hoverImage?: string; discount?: string; title: string; reviews: string; price: number; timer: string; slug?: string; discountPercent?: number | null }
+type Props = { image: string | StaticImageData; hoverImage?: string | StaticImageData; discount?: string; title: string; reviews: string; price: number; timer: string; slug?: string; discountPercent?: number | null }
 
 const ProductCardDetailed = ({ image, hoverImage, discount, title, reviews, price, timer, slug: slugProp, discountPercent }: Props) => {
   const { addToCart, updateQuantity, items } = useCart();

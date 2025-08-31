@@ -1,8 +1,9 @@
 "use client";
 import Image from "next/image";
+import type { StaticImageData } from "next/image";
 
 interface ProductCardProps {
-  image: string;
+  image: string | StaticImageData;
   title: string;
 }
 

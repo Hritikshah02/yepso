@@ -1,15 +1,32 @@
 "use client";
-import ProductCardCatalog from "./productcard"; 
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import type { StaticImageData } from "next/image";
+import ProductCardCatalog from "./productcard";
+import ProductCardDetailed from "./productcarddetailed";
 import sampleImg from "../../../../all products front and side png images/sample.jpg";
+import homeUpsImg from "../../../../all products front and side png images/Home UPS inverter.png";
+import newImg from "../../../../all products front and side png images/3 in 1 Inverter UPS Front.png";
+import washingMachineStabImg from "../../../../all products front and side png images/voltage stabilizer for washing macine yepd90 front.png";
+// Removed left promo image; header will align with link similar to Catalogue
 
 interface PromoBannerProps {
   image: string | StaticImageData;
   discountText: string;
   title: string;
   buttonText: string;
+}
+
+type ApiProduct = {
+  id: number
+  slug: string
+  name: string
+  price: number
+  imageUrl?: string | null
+  createdAt?: string
+  _count?: { cartItems: number }
+  discountPercent?: number | null
 }
 
 const SolorBanner: React.FC<PromoBannerProps> = ({ image, discountText, title, buttonText }) => (
@@ -52,38 +69,99 @@ const SolorBanner: React.FC<PromoBannerProps> = ({ image, discountText, title, b
 ;
 
 const Categories: React.FC = () => {
+  const [list, setList] = useState<ApiProduct[] | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    let active = true
+    ;(async () => {
+      try {
+        setLoading(true)
+        const res = await fetch('/api/products', { cache: 'no-store' })
+        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+        const data: ApiProduct[] = await res.json()
+        if (active) setList(data)
+      } catch {
+        if (active) setList([])
+      } finally {
+        if (active) setLoading(false)
+      }
+    })()
+    return () => { active = false }
+  }, [])
+
+  const byName = (needle: string) => (p: ApiProduct) => (p.name ?? '').toLowerCase().includes(needle)
+  const homeUps = useMemo(() => (list ?? []).find(p => byName('home')(p) && (byName('ups')(p) || byName('inverter')(p))) ?? null, [list])
+  const latest = useMemo(() => {
+    const arr = list ?? []
+    const sorted = [...arr].sort((a, b) => +new Date(b.createdAt ?? 0) - +new Date(a.createdAt ?? 0))
+    return sorted.find(p => p.slug !== homeUps?.slug) ?? sorted[0]
+  }, [list, homeUps])
+  const washing = useMemo(() => {
+    const arr = list ?? []
+    const sorted = [...arr]
+    const prefer = sorted.find(p => (byName('washing')(p) || byName('stabilizer')(p)) && p.slug !== homeUps?.slug && p.slug !== latest?.slug)
+    if (prefer) return prefer
+    return sorted.find(p => p.slug !== homeUps?.slug && p.slug !== latest?.slug) ?? null
+  }, [list, homeUps, latest])
+
   return (
-    <div className="px-4 sm:px-6 md:px-12 py-8 sm:py-10">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 items-center gap-5 sm:gap-6 mt-6 text-black">
-        <div className="flex flex-col lg:flex-col mb-4 border-b pb-4">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold border-b-[5px] border-red-600 pb-3 sm:pb-4 leading-tight sm:leading-[3.5rem]">
-            Shop by <br /> Categories
-          </h1>
-          <div className="flex-col items-center gap-4">
-            <div className="flex gap-4 items-center justify-center">
-              <Image
-                src="/Static/Image/about3.png"
-                alt="Category Icon"
-                width={150}
-                height={50}
-              />
-              <p className="text-sm sm:text-base font-semibold text-left">
-                10+ <br /> New Products
-              </p>
-            </div>
-            <Link href="/products" className=" font-semibold text-base sm:text-lg flex items-center gap-2">
-              <span className="border-b-[3px] border-b-red-600 pb-1 pr-2">All Categories →</span>
-            </Link>
-          </div>
+    <div className="px-4 sm:px-6 md:px-12 py-6 sm:py-8">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-4 border-b pb-4 text-black">
+        <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold">Top Products<div className="w-1/2 sm:w-2/3 lg:w-[60%] h-[3px] bg-red-600 mt-3 sm:mt-4"></div></h2>
+        <Link href="/products#catalog" className="font-semibold text-base sm:text-lg text-gray-600 hover:text-black flex items-center gap-2">
+          <span className="border-b-[3px] border-b-red-600 pb-1 pr-2">All Products →</span>
+        </Link>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 items-stretch gap-6 lg:gap-8 mt-4">
+        <div className="h-full"> {/* cards in the catalog section*/}
+          {homeUps ? (
+            <ProductCardDetailed
+              image={homeUps.imageUrl || (homeUpsImg as unknown as string)}
+              title={homeUps.name}
+              reviews={String(homeUps._count?.cartItems ?? 0)}
+              price={homeUps.price}
+              timer="—"
+              slug={homeUps.slug}
+              discountPercent={homeUps.discountPercent ?? undefined}
+              discount={homeUps.discountPercent ? `-${homeUps.discountPercent}%` : undefined}
+            />
+          ) : (
+            <ProductCardCatalog image={homeUpsImg} title="Home UPS Inverter" />
+          )}
         </div>
-        <div> {/* cards in the catalog section*/}
-          <ProductCardCatalog image="/Static/Image/about2.png" title="Inverter 1" />
+        <div className="h-full">
+          {latest ? (
+            <ProductCardDetailed
+              image={latest.imageUrl || (newImg as unknown as string)}
+              title={latest.name}
+              reviews={String(latest._count?.cartItems ?? 0)}
+              price={latest.price}
+              timer="—"
+              slug={latest.slug}
+              discountPercent={latest.discountPercent ?? undefined}
+              discount={latest.discountPercent ? `-${latest.discountPercent}%` : undefined}
+            />
+          ) : (
+            <ProductCardCatalog image={newImg} title="New" />
+          )}
         </div>
-        <div>
-          <ProductCardCatalog image="/Static/Image/about2.png" title="Inverter 2" />
-        </div>
-        <div>
-          <ProductCardCatalog image="/Static/Image/about2.png" title="Inverter 3" />
+        <div className="h-full">
+          {washing ? (
+            <ProductCardDetailed
+              image={washing.imageUrl || (washingMachineStabImg as unknown as string)}
+              title={washing.name}
+              reviews={String(washing._count?.cartItems ?? 0)}
+              price={washing.price}
+              timer="—"
+              slug={washing.slug}
+              discountPercent={washing.discountPercent ?? undefined}
+              discount={washing.discountPercent ? `-${washing.discountPercent}%` : undefined}
+            />
+          ) : (
+            <ProductCardCatalog image={washingMachineStabImg} title="Voltage Stabilizer for Washing Machine" />
+          )}
         </div>
       </div>
 
