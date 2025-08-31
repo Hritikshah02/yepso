@@ -1,9 +1,6 @@
 "use client";
 
-import Image from "next/image";
-import Iamge1 from "../../../public/Static/Image/about2.png";
-import Iamge2 from "../../../public/Static/Image/about1.png";
-import Iamge3 from "../../../public/Static/Image/about3.png";
+import { ABOUT_SECTION_IMAGE_URL } from "../../lib/assets";
 
 export default function AboutYepso() {
   return (
@@ -32,13 +29,15 @@ export default function AboutYepso() {
         </div>
       </div>
 
-      {/* Image Section */}
-      <div className="flex justify-center items-center bg-white shadow-lg rounded-2xl p-6 h-full min-h-[413px] overflow-x-hidden">
-        <div className="flex flex-wrap justify-center gap-4">
-          <Image src={Iamge1} alt="Image 1" width={150} height={200} className="object-contain rounded-lg" />
-          <Image src={Iamge2} alt="Image 2" width={150} height={200} className="object-contain rounded-lg" />
-          <Image src={Iamge3} alt="Image 3" width={150} height={200} className="object-contain rounded-lg" />
-        </div>
+      {/* Image Section (single Cloudinary-configurable image) */}
+      <div className="flex justify-center items-center bg-white shadow-lg rounded-2xl p-6 h-full min-h-[413px] overflow-hidden">
+        <img
+          src={ABOUT_SECTION_IMAGE_URL}
+          alt="About Yepso products"
+          className="object-contain h-auto w-auto max-w-full"
+          loading="lazy"
+          decoding="async"
+        />
       </div>
     </div>
   );
