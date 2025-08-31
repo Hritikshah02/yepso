@@ -11,7 +11,7 @@ export const NAV_LOGO_URL =
 
 export const HOME_PROMO_IMAGE_URL =
   process.env.NEXT_PUBLIC_HOME_PROMO_IMAGE_URL ||
-  "/Static/Image/image.png";
+  "https://res.cloudinary.com/dkxflu8nz/image/upload/v1756184944/families_hbmps8.jpg";
 
 function envList(name: string): string[] {
   const raw = process.env[name];
