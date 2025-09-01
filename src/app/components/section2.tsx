@@ -38,7 +38,7 @@ export default function VoltageEngineer() {
       {/* First text without background */}
       <div
         className="text-black font-bold text-4xl md:text-5xl lg:text-6xl text-center px-4 py-2"
-        style={{ fontFamily: 'Cabinet Grotesk' }}
+        style={{ fontFamily: 'Arial, Helvetica, sans-serif' }}
       >
         Your Voltage Engineer whose first priority
       </div>
@@ -49,7 +49,7 @@ export default function VoltageEngineer() {
         className={`relative w-3/5 text-xl md:text-5xl lg:text-6xl text-center mx-10 px-4 py-2 transition-all duration-500 ease-in-out ${
           highlighted ? 'p-2' : ''
         } ${textColorWhite ? 'text-white' : 'text-black'}`} // Apply text color change after highlight
-        style={{ fontFamily: 'Cabinet Grotesk' }}
+        style={{ fontFamily: 'Arial, Helvetica, sans-serif' }}
       >
         <Image
           src={textBanner}

@@ -16,10 +16,12 @@ const HomePage = () => {
       <PromoBanner />
       <Navbar/>
       <ResponsiveCarousel 
-      images={HOME_CAROUSEL_IMAGES} 
+        images={HOME_CAROUSEL_IMAGES} 
         autoplayDelay={5000} 
         slidesPerView={1} 
-        spaceBetween={30}/>
+        spaceBetween={30}
+        objectFit="fill"
+      />
       <VoltageEngineer/>
       < Cards />
       < AboutYepso />

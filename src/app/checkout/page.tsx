@@ -1,6 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import PromoBanner from "../components/prenavbar";
+import Navbar from "../components/navbar";
+import Footer from "../components/footer";
 
 declare global {
   interface Window {
@@ -251,68 +254,71 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto p-4 sm:p-6 lg:p-8">
-      <h1 className="text-2xl font-semibold mb-4">Checkout</h1>
+    <>
+      <PromoBanner />
+      <Navbar />
+      <div className="max-w-5xl mx-auto p-4 sm:p-6 lg:p-8">
+        <h1 className="text-2xl font-semibold mb-4">Checkout</h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <section className="space-y-3">
-          <h2 className="font-medium">Shipping Address</h2>
-          {input("Full Name", shipping.name, (v) => setShipping({ ...shipping, name: v }), "text", shippingErrors.name)}
-          {input("Phone", shipping.phone, (v) => setShipping({ ...shipping, phone: v }), "tel", shippingErrors.phone)}
-          {input("Address Line 1", shipping.line1, (v) => setShipping({ ...shipping, line1: v }), "text", shippingErrors.line1)}
-          {input("Address Line 2", shipping.line2 || "", (v) => setShipping({ ...shipping, line2: v }))}
-          {select(
-            "State",
-            shipping.state,
-            (v) => setShipping({ ...shipping, state: v, city: "" }),
-            IN_STATES,
-            "Select state",
-            shippingErrors.state
-          )}
-          {(() => {
-            const cities = CITIES_BY_STATE[shipping.state] || [];
-            return cities.length > 0
-              ? select("City", shipping.city, (v) => setShipping({ ...shipping, city: v }), cities, "Select city", shippingErrors.city)
-              : input("City", shipping.city, (v) => setShipping({ ...shipping, city: v }), "text", shippingErrors.city);
-          })()}
-          {input("Postal Code", shipping.postalCode, (v) => setShipping({ ...shipping, postalCode: v }), "text", shippingErrors.postalCode)}
-        </section>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <section className="space-y-3">
+            <h2 className="font-medium">Shipping Address</h2>
+            {input("Full Name", shipping.name, (v) => setShipping({ ...shipping, name: v }), "text", shippingErrors.name)}
+            {input("Phone", shipping.phone, (v) => setShipping({ ...shipping, phone: v }), "tel", shippingErrors.phone)}
+            {input("Address Line 1", shipping.line1, (v) => setShipping({ ...shipping, line1: v }), "text", shippingErrors.line1)}
+            {input("Address Line 2", shipping.line2 || "", (v) => setShipping({ ...shipping, line2: v }))}
+            {select(
+              "State",
+              shipping.state,
+              (v) => setShipping({ ...shipping, state: v, city: "" }),
+              IN_STATES,
+              "Select state",
+              shippingErrors.state
+            )}
+            {(() => {
+              const cities = CITIES_BY_STATE[shipping.state] || [];
+              return cities.length > 0
+                ? select("City", shipping.city, (v) => setShipping({ ...shipping, city: v }), cities, "Select city", shippingErrors.city)
+                : input("City", shipping.city, (v) => setShipping({ ...shipping, city: v }), "text", shippingErrors.city);
+            })()}
+            {input("Postal Code", shipping.postalCode, (v) => setShipping({ ...shipping, postalCode: v }), "text", shippingErrors.postalCode)}
+          </section>
 
-        <section className="space-y-3">
-          <h2 className="font-medium">Billing Address</h2>
-          <label className="flex items-center gap-2 mb-2">
-            <input type="checkbox" checked={sameAsShipping} onChange={(e) => setSameAsShipping(e.target.checked)} />
-            <span>Same as shipping</span>
-          </label>
-          {!sameAsShipping && (
-            <div className="space-y-3">
-              {input("Full Name", billing.name, (v) => setBilling({ ...billing, name: v }), "text", billingErrors.name)}
-              {input("Phone", billing.phone, (v) => setBilling({ ...billing, phone: v }), "tel", billingErrors.phone)}
-              {input("Address Line 1", billing.line1, (v) => setBilling({ ...billing, line1: v }), "text", billingErrors.line1)}
-              {input("Address Line 2", billing.line2 || "", (v) => setBilling({ ...billing, line2: v }))}
-              {select(
-                "State",
-                billing.state,
-                (v) => setBilling({ ...billing, state: v, city: "" }),
-                IN_STATES,
-                "Select state",
-                billingErrors.state
-              )}
-              {(() => {
-                const cities = CITIES_BY_STATE[billing.state] || [];
-                return cities.length > 0
-                  ? select("City", billing.city, (v) => setBilling({ ...billing, city: v }), cities, "Select city", billingErrors.city)
-                  : input("City", billing.city, (v) => setBilling({ ...billing, city: v }), "text", billingErrors.city);
-              })()}
-              {input("Postal Code", billing.postalCode, (v) => setBilling({ ...billing, postalCode: v }), "text", billingErrors.postalCode)}
-            </div>
-          )}
-          <div className="mt-4">
-            {input("Email (login email)", email, setEmail, "email", emailError)}
-          </div>
-        </section>
-      </div>
+          <section className="space-y-3">
+            <h2 className="font-medium">Billing Address</h2>
+            <label className="flex items-center gap-2 mb-2">
+              <input type="checkbox" checked={sameAsShipping} onChange={(e) => setSameAsShipping(e.target.checked)} />
+              <span>Same as shipping</span>
+            </label>
+            {!sameAsShipping && (
+              <div className="space-y-3">
+                {input("Full Name", billing.name, (v) => setBilling({ ...billing, name: v }), "text", billingErrors.name)}
+                {input("Phone", billing.phone, (v) => setBilling({ ...billing, phone: v }), "tel", billingErrors.phone)}
+                {input("Address Line 1", billing.line1, (v) => setBilling({ ...billing, line1: v }), "text", billingErrors.line1)}
+                {input("Address Line 2", billing.line2 || "", (v) => setBilling({ ...billing, line2: v }))}
+                {select(
+                  "State",
+                  billing.state,
+                  (v) => setBilling({ ...billing, state: v, city: "" }),
+                  IN_STATES,
+                  "Select state",
+                  billingErrors.state
+                )}
+                {(() => {
+                  const cities = CITIES_BY_STATE[billing.state] || [];
+                  return cities.length > 0
+                    ? select("City", billing.city, (v) => setBilling({ ...billing, city: v }), cities, "Select city", billingErrors.city)
+                    : input("City", billing.city, (v) => setBilling({ ...billing, city: v }), "text", billingErrors.city);
+                })()}
+                {input("Postal Code", billing.postalCode, (v) => setBilling({ ...billing, postalCode: v }), "text", billingErrors.postalCode)}
+              </div>
+            )}
+          </section>
+        </div>
 
+        <div className="mt-4">
+          {input("Email (login email)", email, setEmail, "email", emailError)}
+        </div>
       {error && <p className="text-red-600 mt-4">{error}</p>}
 
       <div className="flex gap-3 mt-6">
@@ -323,6 +329,8 @@ export default function CheckoutPage() {
           Cash on Delivery
         </button>
       </div>
-    </div>
+      </div>
+      <Footer />
+    </>
   );
 }

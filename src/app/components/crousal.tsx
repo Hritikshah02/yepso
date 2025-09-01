@@ -13,6 +13,7 @@ interface CarouselProps {
   autoplayDelay?: number; // Autoplay delay in milliseconds
   slidesPerView?: number; // Number of slides visible at once
   spaceBetween?: number; // Space between slides
+  objectFit?: 'cover' | 'contain' | 'fill' | 'none' | 'scale-down'; // Object fit behavior for images
 }
 
 const Carousel: React.FC<CarouselProps> = ({
@@ -20,10 +21,11 @@ const Carousel: React.FC<CarouselProps> = ({
   autoplayDelay = 3000,
   slidesPerView = 1,
   spaceBetween = 20,
+  objectFit = 'contain',
 }) => {
   return (
     <div className="w-full mx-auto">
-      <div className="relative w-full aspect-[16/9] md:aspect-[21/9] overflow-hidden rounded-2xl bg-white">
+      <div className="relative w-full aspect-[16/9] md:aspect-[21/9] overflow-hidden bg-white">
         <Swiper
           modules={[Navigation, Pagination, Autoplay]}
           spaceBetween={spaceBetween}
@@ -32,7 +34,7 @@ const Carousel: React.FC<CarouselProps> = ({
           autoplay={{ delay: autoplayDelay }}
           navigation
           pagination={{ clickable: true }}
-          className="rounded-2xl shadow-lg h-full"
+          className="shadow-lg h-full"
         >
           {images.map((src, index) => (
             <SwiperSlide key={index}>
@@ -41,7 +43,7 @@ const Carousel: React.FC<CarouselProps> = ({
                   src={src}
                   alt={`Slide ${index + 1}`}
                   fill
-                  className="object-contain"
+                  style={{ objectFit }}
                   priority={index === 0}
                 />
               </div>

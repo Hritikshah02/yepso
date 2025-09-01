@@ -26,9 +26,9 @@ export const HOME_CAROUSEL_IMAGES: string[] = (() => {
   const fromEnv = envList("NEXT_PUBLIC_HOME_CAROUSEL");
   if (fromEnv.length) return fromEnv;
   return [
-    "/Static/Crousal/landing/Landing Page Banner1.png",
-    "/Static/Crousal/landing/Landing Page Banner1.png",
-    "/Static/Crousal/landing/Landing Page Banner1.png",
+    "https://res.cloudinary.com/dkxflu8nz/image/upload/v1756703530/website_oeoqv2.jpg",
+    "https://res.cloudinary.com/dkxflu8nz/image/upload/v1756703525/website_1_f0qbmo.jpg",
+    "https://res.cloudinary.com/dkxflu8nz/image/upload/v1756703525/stage_sjinkz.jpg",
   ];
 })();
 

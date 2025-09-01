@@ -34,7 +34,9 @@ export default function Navbar() {
 
         {/* Logo (left-aligned) */}
         <div className="flex items-center space-x-2">
-          <Image src={NAV_LOGO_URL} alt="Logo" width={120} height={40} />
+          <Link href="/" aria-label="Go to home">
+            <Image src={NAV_LOGO_URL} alt="Yepso logo" width={120} height={40} />
+          </Link>
         </div>
 
         {/* Centered Menu */}
