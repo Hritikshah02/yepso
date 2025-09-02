@@ -4,6 +4,10 @@ import "./globals.css";
 import '@fortawesome/fontawesome-free/css/all.min.css'  //fontawesome for icon
 import { CartProvider } from './context/CartContext'
 import ImagePreload from './context/ImagePreload'
+import PromoBanner from './components/prenavbar'
+import Navbar from './components/navbar'
+import Footer from './components/footer'
+import PageTransition from './components/PageTransition'
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,10 +31,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}>
         <CartProvider>
           <ImagePreload />
-          {children}
+          <PromoBanner />
+          <Navbar />
+          <main className="flex-1">
+            <PageTransition>
+              {children}
+            </PageTransition>
+          </main>
+          <Footer />
         </CartProvider>
       </body>
     </html>

@@ -28,7 +28,7 @@ export default function Footer() {
   }, []);
 
   return (
-    <footer className="bg-gray-100 py-6 sm:py-8 md:py-10 px-4 sm:px-6 md:px-10">
+    <footer className="bg-gray-100 py-6 sm:py-8 md:py-10 px-4 sm:px-6 md:px-10 animate-fade-in anim-delay-300 will-change">
       <div className="container mx-auto grid grid-cols-1 md:grid-cols-4 gap-6 sm:gap-8 text-black">
 
         {/* Logo */}

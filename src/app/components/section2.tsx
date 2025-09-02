@@ -4,9 +4,11 @@ import textBanner from '../../../public/Static/Image/text2background.png';
 import Image from 'next/image';
 
 export default function VoltageEngineer() {
-  const [hasScrolled, setHasScrolled] = useState(false);
   const [highlighted, setHighlighted] = useState(false); // Track if highlight effect is applied
   const [textColorWhite, setTextColorWhite] = useState(false); // Track if text color should be white
+  const fullText = 'is customer satisfaction!!';
+  const [typedOnce, setTypedOnce] = useState(false);
+  const [displayed, setDisplayed] = useState('');
 
   useEffect(() => {
     const handleScroll = () => {
@@ -33,6 +35,22 @@ export default function VoltageEngineer() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [highlighted]);
 
+  // Start typewriter once when highlighted comes into view
+  useEffect(() => {
+    if (!highlighted || typedOnce) return;
+    let i = 0;
+    setDisplayed('');
+    const id = window.setInterval(() => {
+      i += 1;
+      setDisplayed(fullText.slice(0, i));
+      if (i >= fullText.length) {
+        window.clearInterval(id);
+        setTypedOnce(true);
+      }
+    }, 45); // typing speed (ms per char)
+    return () => window.clearInterval(id);
+  }, [highlighted, typedOnce, fullText]);
+
   return (
     <div className="relative flex flex-col justify-center items-center p-10 bg-pink">
       {/* First text without background */}
@@ -57,7 +75,12 @@ export default function VoltageEngineer() {
           fill
           className="absolute inset-0 -z-10 object-cover"
         />
-        is customer satisfaction!!
+        {displayed}
+        {!typedOnce && highlighted ? <span className="caret" aria-hidden="true"></span> : null}
+        <style jsx>{`
+          @keyframes caretBlink { 0%, 100% { opacity: 0 } 50% { opacity: 1 } }
+          .caret { display:inline-block; width:1px; height:1em; background: currentColor; margin-left:2px; vertical-align:-.15em; animation: caretBlink 1s steps(1) infinite; }
+        `}</style>
       </div>
     </div>
   );

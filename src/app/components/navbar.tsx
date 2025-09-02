@@ -29,7 +29,7 @@ export default function Navbar() {
   }, []);
 
   return (
-    <nav className={`transition-all duration-300 w-full sticky top-0 z-50 ${isScrolled ? 'bg-white bg-opacity-80 shadow-lg' : 'bg-transparent'} overflow-x-hidden`}>
+    <nav className={`transition-all duration-300 w-full sticky top-0 z-50 ${isScrolled ? 'bg-white bg-opacity-80 shadow-lg' : 'bg-transparent'} overflow-x-hidden animate-slide-down-fade anim-delay-200 will-change`}>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between py-3">
 
         {/* Logo (left-aligned) */}
@@ -92,7 +92,7 @@ export default function Navbar() {
 
       {/* Mobile Menu */}
       {isOpen && (
-        <div className="md:hidden flex flex-col items-center space-y-4 p-4 bg-white shadow-lg">
+        <div className="md:hidden flex flex-col items-center space-y-4 p-4 bg-white shadow-lg animate-slide-down-fade will-change">
           <Link href="/" className="text-black hover:text-red-600">Home</Link>
           <Link href="/products" className="text-black hover:text-red-600">Products</Link>
           <Link href="/contactUs" className="text-black hover:text-red-600">Contact Us</Link>

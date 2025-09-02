@@ -21,7 +21,7 @@ const PromoBanner = () => {
   }, []);
 
   return (
-    <div className="bg-red-600 py-2 text-center font-semibold relative w-full overflow-x-hidden">
+    <div className="bg-red-600 py-2 text-center font-semibold relative w-full overflow-x-hidden animate-slide-down-fade anim-delay-100 will-change">
       <div
         className={`flex justify-evenly items-center whitespace-nowrap overflow-x-hidden ${
           isMobile ? 'marquee animate-marquee ' : ''

@@ -1,8 +1,5 @@
 'use client';
 
-import PromoBanner from '../../components/prenavbar';
-import Navbar from '../../components/navbar';
-import Footer from '../../components/footer';
 import ProductCardDetailed from "../components/productcarddetailed";
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
@@ -92,23 +89,13 @@ export default function ProductPage() {
 
   if (loading) {
     return (
-      <>
-        <PromoBanner />
-        <Navbar />
-        <div className="w-full mx-auto p-8 text-gray-600">Loading product...</div>
-        <Footer />
-      </>
+      <div className="w-full mx-auto p-8 text-gray-600">Loading product...</div>
     )
   }
 
   if (error || !product) {
     return (
-      <>
-        <PromoBanner />
-        <Navbar />
-        <div className="w-full mx-auto p-8 text-red-600">{error || 'Product not found'}</div>
-        <Footer />
-      </>
+      <div className="w-full mx-auto p-8 text-red-600">{error || 'Product not found'}</div>
     )
   }
 
@@ -118,8 +105,6 @@ export default function ProductPage() {
 
   return (
     <>
-      <PromoBanner />
-      <Navbar />
 
       {/* Breadcrumb */}
       <div className="bg-[#F0F0F0] py-2 lg:p-6">
@@ -305,7 +290,6 @@ export default function ProductPage() {
         </div>
       </div>
 
-      <Footer />
     </>
   );
 }

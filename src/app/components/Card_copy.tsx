@@ -138,19 +138,38 @@ export default function ScrollCards() {
     return () => cardsElements.forEach((card) => observer.unobserve(card));
   }, [allCards]);
 
+  // Eased horizontal scroll animation (works consistently across browsers)
+  const animateScrollTo = (el: HTMLElement, to: number, duration = 600) => {
+    const start = el.scrollLeft;
+    const change = to - start;
+    const startTime = performance.now();
+    const easeInOut = (t: number) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
+    return new Promise<void>((resolve) => {
+      const step = (now: number) => {
+        const elapsed = now - startTime;
+        const progress = Math.min(1, elapsed / duration);
+        el.scrollLeft = start + change * easeInOut(progress);
+        if (progress < 1) requestAnimationFrame(step);
+        else resolve();
+      };
+      requestAnimationFrame(step);
+    });
+  };
+
   const handleScrollToCategory = (index: number) => {
     const cardElement = cardRefs.current.find((card: HTMLDivElement) => card?.dataset?.apiIndex == String(index));
     const container = containerRef.current;
     if (cardElement && container) {
       const containerWidth = container.clientWidth;
       const cardLeftOffset = cardElement.offsetLeft;
-      const scrollLeft = Math.max(0, cardLeftOffset - containerWidth / 2 + cardElement.clientWidth / 2);
+      const desired = cardLeftOffset - containerWidth / 2 + cardElement.clientWidth / 2;
+      const maxScroll = Math.max(0, container.scrollWidth - container.clientWidth);
+      const target = Math.min(Math.max(0, desired), maxScroll);
       // Mark as programmatic scroll, set active immediately, then clear when scroll settles
       isProgrammaticScrollRef.current = true;
       setActiveApiIndex(index);
-      container.scrollTo({ left: scrollLeft, behavior: "smooth" });
+      // Smoothly animate to the clamped target
       if (scrollEndTimerRef.current) window.clearTimeout(scrollEndTimerRef.current);
-      // Debounce: after scrolling stops (~150ms without scroll events), re-enable observer updates
       const onScroll = () => {
         if (scrollEndTimerRef.current) window.clearTimeout(scrollEndTimerRef.current);
         scrollEndTimerRef.current = window.setTimeout(() => {
@@ -159,6 +178,14 @@ export default function ScrollCards() {
         }, 150);
       };
       container.addEventListener('scroll', onScroll);
+      animateScrollTo(container, target, 600).then(() => {
+        // Fallback in case no scroll events fire (very small moves)
+        if (scrollEndTimerRef.current) window.clearTimeout(scrollEndTimerRef.current);
+        scrollEndTimerRef.current = window.setTimeout(() => {
+          isProgrammaticScrollRef.current = false;
+          container.removeEventListener('scroll', onScroll);
+        }, 50);
+      });
     }
   };
 

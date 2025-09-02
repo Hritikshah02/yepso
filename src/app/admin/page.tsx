@@ -1,9 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import PromoBanner from "../components/prenavbar";
-import Navbar from "../components/navbar";
-import Footer from "../components/footer";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -173,8 +170,6 @@ export default function AdminDashboard() {
 
   return (
     <>
-      <PromoBanner />
-      <Navbar />
       <div className="max-w-5xl mx-auto p-4 sm:p-6 lg:p-8">
       <h1 className="text-2xl font-semibold mb-4">Admin Dashboard</h1>
 
@@ -360,7 +355,6 @@ export default function AdminDashboard() {
         )}
       </div>
       </div>
-      <Footer />
     </>
   );
 }

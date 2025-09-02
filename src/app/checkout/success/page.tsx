@@ -2,6 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
+// Layout header/footer are provided globally in src/app/layout.tsx
 
 function CheckoutSuccessInner() {
   const sp = useSearchParams();
@@ -43,7 +44,7 @@ function CheckoutSuccessInner() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto p-8">
+    <div className="max-w-2xl mx-auto p-8 animate-slide-up-fade">
       <h1 className="text-2xl font-semibold mb-2 text-center">Payment Successful</h1>
       <p className="text-gray-600 mb-6 text-center">
         Thank you! If you paid via Razorpay, we will email your order confirmation shortly.

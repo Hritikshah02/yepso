@@ -1,13 +1,8 @@
 "use client";
-import PromoBanner from '../components/prenavbar'; 
-import Navbar from '../components/navbar'; 
-import Fotter from '../components/footer'; 
 
 export default function ContactUs() {
   return (
     <>
-      <PromoBanner />
-      <Navbar />
       <div className="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-10">
         {/* Contact Form Section */}
         <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-sm border p-5 sm:p-6 md:p-8">
@@ -62,7 +57,6 @@ export default function ContactUs() {
           </form>
         </div>
       </div>
-      <Fotter />
     </>
   );
 }

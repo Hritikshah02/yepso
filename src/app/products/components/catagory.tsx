@@ -58,8 +58,14 @@ const SolorBanner: React.FC<PromoBannerProps> = ({ image, discountText, title, b
         <div className="text-white text-center space-y-1 sm:space-y-3 max-w-[min(88%,800px)]">
           <p className="uppercase tracking-wide opacity-90 text-[clamp(0.6rem,1.5vw,0.95rem)]">{discountText}</p>
           <h3 className="font-bold leading-[1.05] drop-shadow text-[clamp(1.8rem,7vw,4rem)]">{title}</h3>
-          <button className="inline-flex items-center justify-center bg-red-600 text-white rounded-full shadow-lg text-[clamp(0.75rem,1.8vw,1.05rem)] px-[clamp(16px,3vw,32px)] py-[clamp(9px,1.6vw,15px)]">
-            {buttonText}
+          <button
+            className="relative overflow-hidden group inline-flex items-center justify-center bg-red-600 text-white rounded-full shadow-lg text-[clamp(0.75rem,1.8vw,1.05rem)] px-[clamp(16px,3vw,32px)] py-[clamp(9px,1.6vw,15px)] transition-colors duration-300"
+          >
+            <span className="relative z-10 transition-colors duration-300 group-hover:text-black">{buttonText}</span>
+            <span
+              aria-hidden
+              className="absolute inset-0 bg-white origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out"
+            />
           </button>
         </div>
       </div>

@@ -3,9 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useCart } from '../context/CartContext'
-import PromoBanner from '../components/prenavbar'
-import Navbar from '../components/navbar'
-import Footer from '../components/footer'
+ 
 import { Trash2 } from 'lucide-react'
 
 interface CartProduct {
@@ -77,11 +75,8 @@ export default function CartPage() {
   if (loading) return <div className="p-6">Loading...</div>
 
   return (
-    <>
-      <PromoBanner />
-      <Navbar />
-      <div className="w-full bg-[#F8F8F8]">
-        <div className="max-w-6xl mx-auto p-6">
+    <div className="w-full bg-[#F8F8F8]">
+      <div className="max-w-6xl mx-auto p-6">
           <h1 className="text-2xl font-bold mb-4">Your Cart</h1>
           {items.length === 0 ? (
             <div className="bg-white rounded-lg p-8 text-center">
@@ -141,10 +136,8 @@ export default function CartPage() {
               </aside>
             </div>
           )}
-        </div>
       </div>
-      <Footer />
-    </>
+    </div>
   )
 }
 

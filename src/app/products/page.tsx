@@ -1,19 +1,14 @@
-import PromoBanner from '../components/prenavbar'; 
-import Navbar from '../components/navbar'; 
-import Footer from '../components/footer';
 import ResponsiveCarousel from '../components/crousal';
 import { PRODUCT_CAROUSEL_IMAGES } from '../../lib/assets';
 import Categories from './components/catagory'
 import ProductCatalogue from './components/product'
-import Image from 'next/image';
 
 
 const ProductPage = () => {
   return (
     
     <div className='bg-[#F8F8F8]'>
-      <PromoBanner />
-      <Navbar/>
+      
       <ResponsiveCarousel 
       images={PRODUCT_CAROUSEL_IMAGES} 
         autoplayDelay={5000} 
@@ -24,8 +19,6 @@ const ProductPage = () => {
         <ProductCatalogue/>
 
     
-
-      <Footer />
 
     </div>
   );

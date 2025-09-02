@@ -1,9 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import PromoBanner from "../components/prenavbar";
-import Navbar from "../components/navbar";
-import Footer from "../components/footer";
 
 declare global {
   interface Window {
@@ -254,11 +251,8 @@ export default function CheckoutPage() {
   }
 
   return (
-    <>
-      <PromoBanner />
-      <Navbar />
-      <div className="max-w-5xl mx-auto p-4 sm:p-6 lg:p-8">
-        <h1 className="text-2xl font-semibold mb-4">Checkout</h1>
+    <div className="max-w-5xl mx-auto p-4 sm:p-6 lg:p-8 animate-slide-up-fade">
+      <h1 className="text-2xl font-semibold mb-4">Checkout</h1>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <section className="space-y-3">
@@ -319,18 +313,16 @@ export default function CheckoutPage() {
         <div className="mt-4">
           {input("Email (login email)", email, setEmail, "email", emailError)}
         </div>
-      {error && <p className="text-red-600 mt-4">{error}</p>}
+        {error && <p className="text-red-600 mt-4">{error}</p>}
 
-      <div className="flex gap-3 mt-6">
-        <button disabled={formInvalid || loading} onClick={startPayment} className="bg-red-600 text-white rounded-md px-5 py-2 disabled:opacity-50">
-          Pay with Razorpay (Cards/UPI/NetBanking)
-        </button>
-        <button disabled={formInvalid || loading} onClick={placeCOD} className="border rounded-md px-5 py-2">
-          Cash on Delivery
-        </button>
+        <div className="flex gap-3 mt-6">
+          <button disabled={formInvalid || loading} onClick={startPayment} className="bg-red-600 text-white rounded-md px-5 py-2 disabled:opacity-50">
+            Pay with Razorpay (Cards/UPI/NetBanking)
+          </button>
+          <button disabled={formInvalid || loading} onClick={placeCOD} className="border rounded-md px-5 py-2">
+            Cash on Delivery
+          </button>
+        </div>
       </div>
-      </div>
-      <Footer />
-    </>
   );
 }
