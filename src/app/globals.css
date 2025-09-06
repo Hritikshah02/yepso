@@ -30,3 +30,12 @@ body {
 
 /* Hint performance for animated elements */
 .will-change { will-change: transform, opacity; }
+
+/* Hide scrollbars in overflow containers (used on mobile card strips) */
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none;    /* Firefox */
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;            /* Chrome, Safari, Opera */
+}

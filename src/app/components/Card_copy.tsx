@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import QuantityControls from "../products/components/QuantityControls";
 import "@fortawesome/fontawesome-free/css/all.min.css";
+import { useRouter } from "next/navigation";
 
 const toSlug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
@@ -44,6 +45,7 @@ const fetchCatalogFallback = async () => {
 export default function ScrollCards() {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const cardRefs = useRef<HTMLDivElement[]>([]);
+  const router = useRouter();
   const [allCards, setAllCards] = useState<CatalogCard[]>([]);
   const [activeApiIndex, setActiveApiIndex] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
@@ -190,9 +192,9 @@ export default function ScrollCards() {
   };
 
   return (
-    <main className="w-screen max-w-none h-full flex items-center justify-center py-8 px-0 flex-col">
+    <main className="w-full max-w-none h-full flex items-center justify-center py-8 px-0 flex-col">
       <div
-        className="flex flex-row justify-start items-center whitespace-nowrap overflow-x-auto w-full px-4 lg:px-8 gap-6 select-none"
+        className="flex flex-row justify-start items-center whitespace-nowrap overflow-x-auto no-scrollbar w-full px-4 lg:px-8 gap-6 select-none"
         style={{ touchAction: 'pan-x' }}
         onPointerDown={(e) => { startRef.current = { x: e.clientX, y: e.clientY }; draggingRef.current = false; }}
         onPointerMove={(e) => {
@@ -216,7 +218,7 @@ export default function ScrollCards() {
         ))}
       </div>
 
-      <div ref={containerRef} className="relative w-full overflow-x-auto scroll-smooth">
+      <div ref={containerRef} className="relative w-full overflow-x-auto no-scrollbar scroll-smooth">
         <div className="flex gap-6 w-max py-8 px-6">
           {loading && (
             <div className="text-gray-500">Loading catalogs…</div>
@@ -230,8 +232,16 @@ export default function ScrollCards() {
               <div
                 key={`${card.id}-${card.card_title}-${index}`}
                 data-api-index={card.apiIndex}
-                className="relative w-[400px] h-[300px] rounded-xl bg-white shadow-lg overflow-hidden group card lg:gap-10"
+                className="relative w-[280px] h-[220px] sm:w-[340px] sm:h-[255px] md:w-[380px] md:h-[285px] lg:w-[400px] lg:h-[300px] rounded-xl bg-white shadow-lg overflow-hidden group card lg:gap-10"
                 ref={(el) => { if (el) cardRefs.current[index] = el; }}
+                onClick={(e) => {
+                  // On small screens, tap anywhere on the card navigates to product page
+                  if (typeof window !== 'undefined' && window.innerWidth < 640) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    router.push(`/products/${slug}`);
+                  }
+                }}
               >
                 {/* Main Image: Render only if a valid URL exists */}
                 <div className="relative w-full h-full bg-white">
@@ -247,7 +257,7 @@ export default function ScrollCards() {
                 </div>
 
                 {/* Hover overlay with Quick View and Add to Cart */}
-                <div className="absolute inset-0 flex flex-col justify-center items-center opacity-0 group-hover:opacity-100 bg-black/30 duration-500">
+                <div className="absolute inset-0 hidden sm:flex flex-col justify-center items-center opacity-0 group-hover:opacity-100 bg-black/30 duration-500">
                   <Link href={`/products/${slug}`} className="relative flex items-center justify-center w-44 h-11 bg-white text-black rounded-full mx-2 mb-2 transition-all duration-300 hover:bg-gray-800 hover:text-white group/button">
                     <span className="group-hover/button:opacity-0 transition-opacity duration-200">Quick View</span>
                     <i className="fa-solid fa-eye absolute opacity-0 group-hover/button:opacity-100 transition-opacity duration-200"></i>
@@ -272,7 +282,7 @@ export default function ScrollCards() {
 
                 {/* Title Section */}
                 <div className="absolute bottom-0 left-0 w-full bg-white p-2">
-                  <p className="text-gray-800 font-semibold text-xl px-4 rounded-lg border-solid">
+                  <p className="text-gray-800 font-semibold text-base sm:text-lg px-4 rounded-lg border-solid">
                     {card.card_title}
                   </p>
                 </div>

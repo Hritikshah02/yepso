@@ -5,11 +5,13 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { NAV_LOGO_URL } from '../../lib/assets';
 import { useCart } from '../context/CartContext';
+import { usePathname } from 'next/navigation';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const { count } = useCart();
+  const pathname = usePathname();
 
   // Handle scroll event to add/remove the scrolled class
   useEffect(() => {
@@ -19,6 +21,8 @@ export default function Navbar() {
       } else {
         setIsScrolled(false);
       }
+      // Always close mobile menu when the user scrolls
+      setIsOpen(false);
     };
 
     window.addEventListener('scroll', handleScroll);
@@ -27,6 +31,11 @@ export default function Navbar() {
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setIsOpen(false);
+  }, [pathname]);
 
   return (
     <nav className={`transition-all duration-300 w-full sticky top-0 z-50 ${isScrolled ? 'bg-white bg-opacity-80 shadow-lg' : 'bg-transparent'} overflow-x-hidden animate-slide-down-fade anim-delay-200 will-change`}>
@@ -93,9 +102,9 @@ export default function Navbar() {
       {/* Mobile Menu */}
       {isOpen && (
         <div className="md:hidden flex flex-col items-center space-y-4 p-4 bg-white shadow-lg animate-slide-down-fade will-change">
-          <Link href="/" className="text-black hover:text-red-600">Home</Link>
-          <Link href="/products" className="text-black hover:text-red-600">Products</Link>
-          <Link href="/contactUs" className="text-black hover:text-red-600">Contact Us</Link>
+          <Link href="/" className="text-black hover:text-red-600" onClick={() => setIsOpen(false)}>Home</Link>
+          <Link href="/products" className="text-black hover:text-red-600" onClick={() => setIsOpen(false)}>Products</Link>
+          <Link href="/contactUs" className="text-black hover:text-red-600" onClick={() => setIsOpen(false)}>Contact Us</Link>
 
           {/* Search Bar */}
           <div className="relative">

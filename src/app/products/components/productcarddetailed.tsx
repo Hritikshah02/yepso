@@ -6,6 +6,7 @@ import { useCart } from "../../context/CartContext";
 import "@fortawesome/fontawesome-free/css/all.min.css"; // Import Font Awesome
 import QuantityControls from "./QuantityControls";
 import type { StaticImageData } from "next/image";
+import { useRouter } from 'next/navigation';
 
 type Props = { image: string | StaticImageData; hoverImage?: string | StaticImageData; discount?: string; title: string; reviews: string; price: number; timer: string; slug?: string; discountPercent?: number | null }
 
@@ -16,8 +17,19 @@ const ProductCardDetailed = ({ image, hoverImage, discount, title, reviews, pric
   const pct = typeof discountPercent === 'number' ? discountPercent : 0
   const hasDiscount = pct > 0
   const originalPrice = hasDiscount && (1 - pct / 100) > 0 ? Math.round(price / (1 - pct / 100)) : null
+  const router = useRouter();
   return (
-    <div className="group relative shadow-lg rounded-xl bg-white mx-auto w-full h-full overflow-hidden">
+    <div
+      className="group relative shadow-lg rounded-xl bg-white mx-auto w-full h-full overflow-hidden"
+      onClick={(e) => {
+        // On small screens, tap anywhere on the card navigates to product page
+        if (typeof window !== 'undefined' && window.innerWidth < 640) {
+          e.preventDefault();
+          e.stopPropagation();
+          router.push(`/products/${slug}`);
+        }
+      }}
+    >
       <div className="relative bg-[#EDEDED] h-64 sm:h-72 md:h-80">
         {/* Main Image */}
         {image && (
@@ -47,8 +59,8 @@ const ProductCardDetailed = ({ image, hoverImage, discount, title, reviews, pric
           </span>
         )}
 
-        {/* Buttons (hidden by default and appear on hover) */}
-        <div className="absolute inset-0 flex flex-col justify-center items-center opacity-0 group-hover:opacity-100 bg-black/30 duration-500">
+        {/* Buttons (hidden below sm; appear on hover for >= sm) */}
+        <div className="absolute inset-0 hidden sm:flex flex-col justify-center items-center opacity-0 group-hover:opacity-100 bg-black/30 duration-500">
           {/* Quick View Button */}
           <Link href={`/products/${slug}`} className="relative flex items-center justify-center w-44 h-11 bg-white text-black rounded-full mx-2 mb-2 transition-all duration-300 hover:bg-gray-800 hover:text-white group/button">
             <span className="group-hover/button:opacity-0 transition-opacity duration-200">
@@ -70,9 +82,9 @@ const ProductCardDetailed = ({ image, hoverImage, discount, title, reviews, pric
       <p className="text-gray-500 text-xs sm:text-sm mt-2 px-4">
         ⭐ ⭐ ⭐ ⭐ ⭐ ({reviews} Reviews)
       </p>
-      <h3 className="text-lg sm:text-xl md:text-2xl font-semibold px-4">{title}</h3>
+      <h3 className="text-base sm:text-xl md:text-2xl font-semibold px-4">{title}</h3>
       <div className="flex items-center justify-between px-4 pb-3">
-        <p className="text-red-600 font-bold text-base sm:text-lg md:text-xl">
+        <p className="text-red-600 font-bold text-sm sm:text-lg md:text-xl">
           {hasDiscount && originalPrice ? (
             <>
               <span className="line-through text-gray-400 mr-2">Rs {originalPrice}</span>
