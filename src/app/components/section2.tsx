@@ -1,7 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
 import textBanner from '../../../public/Static/Image/text2background.png';
-import Image from 'next/image';
 
 export default function VoltageEngineer() {
   const [highlighted, setHighlighted] = useState(false); // Track if highlight effect is applied
@@ -52,7 +51,7 @@ export default function VoltageEngineer() {
   }, [highlighted, typedOnce, fullText]);
 
   return (
-    <div className="relative flex flex-col justify-center items-center p-10 bg-pink">
+    <div className="relative flex flex-col justify-center items-center p-6 md:p-10 w-full overflow-x-hidden">
       {/* First text without background */}
       <div
         className="text-black font-bold text-4xl md:text-5xl lg:text-6xl text-center px-4 py-2"
@@ -64,16 +63,19 @@ export default function VoltageEngineer() {
       {/* Second text with background and highlighter effect */}
       <div
         id="highlightText"
-        className={`relative w-3/5 text-xl md:text-5xl lg:text-6xl text-center mx-10 px-4 py-2 transition-all duration-500 ease-in-out ${
-          highlighted ? 'p-2' : ''
-        } ${textColorWhite ? 'text-white' : 'text-black'}`} // Apply text color change after highlight
+        className={`relative inline-block max-w-full text-[clamp(18px,3.4vw,38px)] leading-tight text-center px-5 sm:px-6 md:px-8 lg:px-10 py-2 md:py-3 whitespace-nowrap transition-all duration-500 ease-in-out ${
+          highlighted ? '' : ''
+        } ${textColorWhite ? 'text-white' : 'text-black'}`}
         style={{ fontFamily: 'Arial, Helvetica, sans-serif' }}
       >
-        <Image
-          src={textBanner}
-          alt="Background Red"
-          fill
-          className="absolute inset-0 -z-10 object-cover"
+        {/* Brush image behind text, keeps natural aspect ratio */}
+        <img
+          src={(textBanner as unknown as { src: string }).src}
+          alt=""
+          aria-hidden="true"
+          className="pointer-events-none select-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[155%] sm:w-[150%] md:w-[145%] lg:w-[140%] h-auto -z-10 transform origin-center scale-y-150 sm:scale-y-145 md:scale-y-140 lg:scale-y-135"
+          loading="lazy"
+          decoding="async"
         />
         {displayed}
         {!typedOnce && highlighted ? <span className="caret" aria-hidden="true"></span> : null}

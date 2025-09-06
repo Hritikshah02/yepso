@@ -35,8 +35,8 @@ const SolorBanner: React.FC<PromoBannerProps> = ({ image, discountText, title, b
     style={{
       // Keep text box and border perfectly aligned regardless of screen size
       // by sharing the same inset and radius values.
-      ['--frame' as any]: 'clamp(12px, 2.5vw, 24px)',
-      ['--radius' as any]: 'clamp(12px, 2vw, 24px)',
+      ['--frame' as any]: 'clamp(14px, 3vw, 28px)',
+      ['--radius' as any]: 'clamp(16px, 2.2vw, 28px)',
     }}
   >
     <Image
@@ -51,15 +51,15 @@ const SolorBanner: React.FC<PromoBannerProps> = ({ image, discountText, title, b
     {/* White framed overlay to match the image structure */}
     <div className="absolute inset-0">
       {/* Border frame with fluid inset */}
-      <div className="absolute inset-[var(--frame)] border-white border-[3px] md:border-[4px] rounded-[var(--radius)] pointer-events-none" />
+      <div className="absolute inset-[var(--frame)] border-white border-[2.5px] md:border-[3px] lg:border-[4px] rounded-[var(--radius)] pointer-events-none" />
 
       {/* Centered overlay content, confined to the same frame inset */}
       <div className="absolute inset-[var(--frame)] flex items-center justify-center">
-        <div className="text-white text-center space-y-1 sm:space-y-3 max-w-[min(88%,800px)]">
+        <div className="text-white text-center space-y-2 sm:space-y-3 mx-auto max-w-[min(80%,780px)] sm:max-w-[min(72%,860px)] md:max-w-[min(64%,940px)]">
           <p className="uppercase tracking-wide opacity-90 text-[clamp(0.6rem,1.5vw,0.95rem)]">{discountText}</p>
-          <h3 className="font-bold leading-[1.05] drop-shadow text-[clamp(1.8rem,7vw,4rem)]">{title}</h3>
+          <h3 className="font-bold leading-[1.05] drop-shadow text-[clamp(1.35rem,2.9vw,2.8rem)]">{title}</h3>
           <button
-            className="relative overflow-hidden group inline-flex items-center justify-center bg-red-600 text-white rounded-full shadow-lg text-[clamp(0.75rem,1.8vw,1.05rem)] px-[clamp(16px,3vw,32px)] py-[clamp(9px,1.6vw,15px)] transition-colors duration-300"
+            className="relative overflow-hidden group inline-flex items-center justify-center bg-red-600 text-white rounded-full shadow-lg text-[clamp(0.78rem,1.6vw,1rem)] px-[clamp(14px,2.2vw,24px)] py-[clamp(8px,1.2vw,12px)] transition-colors duration-300"
           >
             <span className="relative z-10 transition-colors duration-300 group-hover:text-black">{buttonText}</span>
             <span

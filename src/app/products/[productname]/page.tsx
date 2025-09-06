@@ -247,17 +247,18 @@ export default function ProductPage() {
 
       {/* Tabs Section */}
       <div className="mt-[30px] max-w-[1440px] mx-auto p-[15px]">
-        <div className="flex justify-center gap-[20px] border-b pb-[10px]">
-          {productTabs.map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`py-[10px] px-[20px] ${activeTab === tab ? 'border-b-[3px] border-black font-semibold' : ''
-                }`}
-            >
-              {tab}
-            </button>
-          ))}
+        <div className="border-b pb-[10px] -mx-4 px-4">
+          <div className="flex gap-[16px] md:gap-[20px] overflow-x-auto whitespace-nowrap md:whitespace-normal no-scrollbar md:justify-center">
+            {productTabs.map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`py-[10px] px-[20px] flex-shrink-0 ${activeTab === tab ? 'border-b-[3px] border-black font-semibold' : ''}`}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
         </div>
         <div className="mt-[20px] text-gray-700">
           {{
@@ -268,10 +269,14 @@ export default function ProductPage() {
             Specifications: product.specifications ?? '—',
           }[activeTab]}
         </div>
+        <style jsx>{`
+          .no-scrollbar::-webkit-scrollbar { display: none; }
+          .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        `}</style>
       </div>
 
       {/* Suggested Products */}
-      <h1 className='text-4xl text-center py-2 sm:text-lg md:text-2xl'>You may also Like</h1>
+      <h1 className='text-xl sm:text-2xl md:text-3xl lg:text-4xl text-center py-2'>You may also Like</h1>
       <div className="px-4 sm:px-6 md:px-12 py-10 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 items-stretch">
           {related.map((p) => (
