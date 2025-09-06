@@ -4,7 +4,7 @@ import { ABOUT_SECTION_IMAGE_URL } from "../../lib/assets";
 
 export default function AboutYepso() {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 w-full px-4 sm:px-8 md:px-16 lg:px-24 py-12 gap-8">
+    <div className="grid grid-cols-1 md:grid-cols-2 w-full px-4 sm:px-8 md:px-16 lg:px-24 pt-12 pb-4 sm:pb-6 gap-8">
       {/* About Us Card */}
       <div className="relative bg-white shadow-lg rounded-2xl p-8 h-full min-h-[413px] flex flex-col justify-between transition-transform duration-300 ease-out will-change-transform hover:scale-[1.02] hover:shadow-2xl hover:-translate-y-0.5 motion-reduce:transform-none cursor-pointer">
         {/* Title */}

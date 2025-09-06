@@ -18,11 +18,24 @@ const HomePage = () => {
       <VoltageEngineer/>
       <Cards />
       <AboutYepso />
-      <div>
+      {/* Tagline before the bottom photo (bold, uppercase, minimal spacing) */}
+      <section className="px-4 sm:px-6 md:px-12 mt-2 sm:mt-4">
+        <div className="mx-auto max-w-5xl text-center">
+          <p className="text-black font-bold uppercase tracking-wide text-[clamp(1.2rem,3.8vw,2.4rem)] leading-tight lg:leading-none lg:whitespace-nowrap">
+            YOUR TRUSTED VOLTAGE ENGINEER
+          </p>
+          <p className="mt-1 text-gray-700 tracking-wide text-[clamp(0.78rem,2.2vw,0.95rem)]">
+            TRUSTED BY 10K+ CUSTOMERS
+          </p>
+        </div>
+      </section>
+
+      {/* Bottom promo photo with improved sizing and styling */}
+      <div className="px-4 sm:px-6 md:px-12 mt-4 sm:mt-6">
         <img
           src={HOME_PROMO_IMAGE_URL}
-          alt="Description of image"
-          className="object-contain p-10 h-auto w-auto max-w-full"
+          alt="Family using Yepso products at home"
+          className="w-full h-auto rounded-2xl shadow-xl ring-1 ring-black/5"
           loading="lazy"
           decoding="async"
         />
