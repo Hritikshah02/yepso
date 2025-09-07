@@ -14,7 +14,7 @@ export const HOME_PROMO_IMAGE_URL =
   "https://res.cloudinary.com/dkxflu8nz/image/upload/v1756184944/families_hbmps8.jpg";
 
 export const ABOUT_SECTION_IMAGE_URL =
-  "https://res.cloudinary.com/dkxflu8nz/image/upload/v1756616623/All_product_png_lnxt1t.png";
+  "https://res.cloudinary.com/dkxflu8nz/image/upload/v1757250300/IMG_2009_qd2dq6.jpg";
 
 function envList(name: string): string[] {
   const raw = process.env[name];

@@ -5,7 +5,6 @@ import Link from "next/link";
 import type { StaticImageData } from "next/image";
 import ProductCardCatalog from "./productcard";
 import ProductCardDetailed from "./productcarddetailed";
-import sampleImg from "../../../../all products front and side png images/sample.jpg";
 import homeUpsImg from "../../../../all products front and side png images/Home UPS inverter.png";
 import newImg from "../../../../all products front and side png images/3 in 1 Inverter UPS Front.png";
 import washingMachineStabImg from "../../../../all products front and side png images/voltage stabilizer for washing macine yepd90 front.png";
@@ -16,6 +15,7 @@ interface PromoBannerProps {
   discountText: string;
   title: string;
   buttonText: string;
+  href: string;
 }
 
 type ApiProduct = {
@@ -29,48 +29,51 @@ type ApiProduct = {
   discountPercent?: number | null
 }
 
-const SolorBanner: React.FC<PromoBannerProps> = ({ image, discountText, title, buttonText }) => (
-  <div
-    className="relative w-full aspect-[16/9]"
-    style={{
-      // Keep text box and border perfectly aligned regardless of screen size
-      // by sharing the same inset and radius values.
-      ['--frame' as any]: 'clamp(14px, 3vw, 28px)',
-      ['--radius' as any]: 'clamp(16px, 2.2vw, 28px)',
-    }}
-  >
-    <Image
-      src={image}
-      alt={title}
-      fill
-      priority={false}
-      sizes="(min-width:1024px) 50vw, (min-width:640px) 50vw, 100vw"
-      className="object-cover rounded-[var(--radius)]"
-    />
+const SolorBanner: React.FC<PromoBannerProps> = ({ image, discountText, title, buttonText, href }) => (
+  <Link href={href} className="block group" aria-label={`${title} – Shop Now`}>
+    <div
+      className="relative w-full aspect-[16/9] rounded-[var(--radius)] bg-black"
+      style={{
+        // Keep text box and border perfectly aligned regardless of screen size
+        // by sharing the same inset and radius values.
+        ['--frame' as any]: 'clamp(14px, 3vw, 28px)',
+        ['--radius' as any]: 'clamp(16px, 2.2vw, 28px)',
+      }}
+    >
+      {/* Image clipped to the inner frame area */}
+      <div className="absolute inset-[var(--frame)] rounded-[var(--radius)] overflow-hidden bg-black">
+        <Image
+          src={image}
+          alt={title}
+          fill
+          priority={false}
+          sizes="(min-width:1024px) 50vw, (min-width:640px) 50vw, 100vw"
+          className="object-cover object-center"
+        />
+      </div>
 
-    {/* White framed overlay to match the image structure */}
-    <div className="absolute inset-0">
+      {/* White framed overlay to match the image structure */}
       {/* Border frame with fluid inset */}
       <div className="absolute inset-[var(--frame)] border-white border-[2.5px] md:border-[3px] lg:border-[4px] rounded-[var(--radius)] pointer-events-none" />
 
       {/* Centered overlay content, confined to the same frame inset */}
       <div className="absolute inset-[var(--frame)] flex items-center justify-center">
-        <div className="text-white text-center space-y-2 sm:space-y-3 mx-auto max-w-[min(80%,780px)] sm:max-w-[min(72%,860px)] md:max-w-[min(64%,940px)]">
-          <p className="uppercase tracking-wide opacity-90 text-[clamp(0.6rem,1.5vw,0.95rem)]">{discountText}</p>
-          <h3 className="font-bold leading-[1.05] drop-shadow text-[clamp(1.35rem,2.9vw,2.8rem)]">{title}</h3>
-          <button
-            className="relative overflow-hidden group inline-flex items-center justify-center bg-red-600 text-white rounded-full shadow-lg text-[clamp(0.78rem,1.6vw,1rem)] px-[clamp(14px,2.2vw,24px)] py-[clamp(8px,1.2vw,12px)] transition-colors duration-300"
-          >
-            <span className="relative z-10 transition-colors duration-300 group-hover:text-black">{buttonText}</span>
+          <div className="text-white text-center space-y-2 sm:space-y-3 mx-auto max-w-[min(80%,780px)] sm:max-w-[min(72%,860px)] md:max-w-[min(64%,940px)]">
+            <p className="uppercase tracking-wide opacity-90 text-[clamp(0.6rem,1.5vw,0.95rem)]">{discountText}</p>
+            <h3 className="font-bold leading-[1.05] drop-shadow text-[clamp(1.35rem,2.9vw,2.8rem)]">{title}</h3>
             <span
-              aria-hidden
-              className="absolute inset-0 bg-white origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out"
-            />
-          </button>
-        </div>
+              className="relative overflow-hidden inline-flex items-center justify-center bg-red-600 text-white rounded-full shadow-lg text-[clamp(0.78rem,1.6vw,1rem)] px-[clamp(14px,2.2vw,24px)] py-[clamp(8px,1.2vw,12px)] transition-colors duration-300"
+            >
+              <span className="relative z-10 transition-colors duration-300 group-hover:text-black">{buttonText}</span>
+              <span
+                aria-hidden
+                className="absolute inset-0 bg-white origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out"
+              />
+            </span>
+          </div>
       </div>
     </div>
-  </div>
+  </Link>
 )
 ;
 
@@ -174,18 +177,20 @@ const Categories: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-8">
         <div> {/* Solar cards in the catalog section*/}
           <SolorBanner
-            image={sampleImg}
+            image="https://res.cloudinary.com/dkxflu8nz/image/upload/v1757260144/HYBRID_inverter_3_in_1_trending_kbojos.jpg"
             discountText="30% OFF ON STUFF"
-            title="Solar Panels"
+            title="Hybrid inverter"
             buttonText="Shop Now"
+            href="/products/3-in-1-inverter"
           />
         </div>
         <div>
           <SolorBanner
-            image={sampleImg}
+            image="https://res.cloudinary.com/dkxflu8nz/image/upload/v1757260143/all_in_one_trending_product_kyhvag.jpg"
             discountText="50% OFF ON STUFF"
-            title="Solar Panels"
+            title="All-in-One Lithium Battery"
             buttonText="Shop Now"
+            href="/products/all-in-one-lithium-battery"
           />
         </div>
       </div>
