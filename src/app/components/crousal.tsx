@@ -5,7 +5,7 @@ import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-import Image from "next/image";
+// Using plain <img> for reliability with external Cloudinary URLs
 
 // Define the prop types for the component
 interface CarouselProps {
@@ -39,12 +39,20 @@ const Carousel: React.FC<CarouselProps> = ({
           {images.map((src, index) => (
             <SwiperSlide key={index}>
               <div className="relative w-full h-full">
-                <Image
+                <img
                   src={src}
                   alt={`Slide ${index + 1}`}
-                  fill
+                  className="absolute inset-0 w-full h-full"
                   style={{ objectFit }}
-                  priority={index === 0}
+                  loading={index === 0 ? 'eager' : 'lazy'}
+                  decoding="async"
+                  referrerPolicy="no-referrer"
+                  crossOrigin="anonymous"
+                  onError={(e) => {
+                    // Surface a useful error in the console for debugging
+                    // @ts-ignore
+                    console.error('Carousel image failed to load:', src, e?.nativeEvent ?? e);
+                  }}
                 />
               </div>
             </SwiperSlide>

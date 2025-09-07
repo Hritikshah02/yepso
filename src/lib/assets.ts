@@ -26,9 +26,9 @@ export const HOME_CAROUSEL_IMAGES: string[] = (() => {
   const fromEnv = envList("NEXT_PUBLIC_HOME_CAROUSEL");
   if (fromEnv.length) return fromEnv;
   return [
-    "https://res.cloudinary.com/dkxflu8nz/image/upload/v1756722723/stage_fdmjr4.jpg",
-    "https://res.cloudinary.com/dkxflu8nz/image/upload/v1756722729/website_iztjny.jpg",
-    "https://res.cloudinary.com/dkxflu8nz/image/upload/v1756722724/website_1_dforku.jpg",
+    "https://res.cloudinary.com/dkxflu8nz/image/upload/v1757250300/IMG_2009_qd2dq6.jpg",
+    "https://res.cloudinary.com/dkxflu8nz/image/upload/v1757250300/cover1_knkqqh.jpg",
+    "https://res.cloudinary.com/dkxflu8nz/image/upload/v1757250300/cover2_l4csri.jpg",
   ];
 })();
 
