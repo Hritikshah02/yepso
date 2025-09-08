@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useCart } from '../../context/CartContext';
+import { useToast } from '../../context/ToastContext';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import type { Swiper as SwiperType } from 'swiper';
 import 'swiper/css';
@@ -36,12 +37,14 @@ export default function ProductPage() {
   const [activeTab, setActiveTab] = useState<ProductTabs>('Description');
   const [swiperRef, setSwiperRef] = useState<SwiperType | null>(null);
   const [quantity, setQuantity] = useState(1);
+  const [bump, setBump] = useState(false)
   const [liked, setLiked] = useState(false);
   const [product, setProduct] = useState<ApiProduct | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { addToCart } = useCart();
   const [related, setRelated] = useState<ApiProduct[]>([])
+  const { showToast } = useToast()
 
   useEffect(() => {
     let alive = true
@@ -82,8 +85,12 @@ export default function ProductPage() {
   const handleQuantityChange = (type: 'increment' | 'decrement') => {
     if (type === 'increment') {
       setQuantity(quantity + 1);
+      setBump(true)
+      window.setTimeout(() => setBump(false), 450)
+      if (product?.name) showToast(`You've changed '${product.name}' quantity to '${quantity + 1}'`, { type: 'success', durationMs: 2200 })
     } else if (type === 'decrement' && quantity > 1) {
       setQuantity(quantity - 1);
+      if (product?.name) showToast(`You've changed '${product.name}' quantity to '${quantity - 1}'`, { type: 'info', durationMs: 2200 })
     }
   };
 
@@ -113,6 +120,11 @@ export default function ProductPage() {
           &gt;
           <span className="font-semibold mx-4">{product.name}</span>
         </div>
+
+      <style jsx>{`
+        @keyframes detailBump { 0%{ transform: scale(1);} 25%{ transform: scale(1.04);} 60%{ transform: scale(1.1);} 100%{ transform: scale(1);} }
+        .detail-bump { animation: detailBump 450ms ease-out; }
+      `}</style>
       </div>
 
       <div className="w-full mx-auto p-4 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:px-20">
@@ -181,7 +193,7 @@ export default function ProductPage() {
           <p className="mt-4 text-gray-600">{(product.description ?? '').slice(0, 300) || '—'}</p>
 
           {/* Add to Cart Section */}
-          <div className="mt-6 flex items-center gap-6 flex-wrap">
+          <div className={`relative mt-6 flex items-center gap-6 flex-wrap ${bump ? 'detail-bump' : ''}`}>
             {/* Quantity Selector */}
             <div className="flex items-center border border-black rounded-xl px-5 py-[6px] gap-1">
               <button
@@ -204,6 +216,9 @@ export default function ProductPage() {
               onClick={async () => {
                 try {
                   await addToCart(product.id, quantity)
+                  setBump(true)
+                  window.setTimeout(() => setBump(false), 450)
+                  showToast(`You've changed '${product.name}' quantity to '${quantity}'`, { type: 'success', durationMs: 2200 })
                 } catch (e) {
                   console.error(e)
                 }
@@ -227,8 +242,11 @@ export default function ProductPage() {
             </button>
           </div>
 
+          {/* Divider to separate actions from features for clearer alignment */}
+          <div className="mt-6 border-t border-gray-200" />
+
           {/* Features Section */}
-          <div className="mt-8 grid grid-cols-2 md:grid-cols-5 gap-x-[10px] gap-y-[10px]">
+          <div className="mt-8 md:mt-10 grid grid-cols-2 md:grid-cols-5 gap-x-[10px] gap-y-[10px]">
             {[
               { icon: '/Static/icons/sine.png', label: 'Pure Sine Wave' },
               { icon: '/Static/icons/MPPT.png', label: 'True MPPT' },

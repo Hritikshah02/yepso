@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import '@fortawesome/fontawesome-free/css/all.min.css'  //fontawesome for icon
 import { CartProvider } from './context/CartContext'
+import { ToastProvider } from './context/ToastContext'
 import ImagePreload from './context/ImagePreload'
 import PromoBanner from './components/prenavbar'
 import Navbar from './components/navbar'
@@ -33,15 +34,17 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}>
         <CartProvider>
-          <ImagePreload />
-          <PromoBanner />
-          <Navbar />
-          <main className="flex-1">
-            <PageTransition>
-              {children}
-            </PageTransition>
-          </main>
-          <Footer />
+          <ToastProvider>
+            <ImagePreload />
+            <PromoBanner />
+            <Navbar />
+            <main className="flex-1">
+              <PageTransition>
+                {children}
+              </PageTransition>
+            </main>
+            <Footer />
+          </ToastProvider>
         </CartProvider>
       </body>
     </html>

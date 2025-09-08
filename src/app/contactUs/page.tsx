@@ -39,17 +39,13 @@ export default function ContactUs() {
               <input type="email" placeholder="Confirm Email" className="mt-2 w-full rounded-xl border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-black/20" />
             </label>
 
-            <div>
-              <span className="text-sm font-medium">Services Interested In</span>
-              <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <label className="inline-flex items-center gap-2 text-gray-800"><input type="checkbox" className="accent-black" /> Website Design</label>
-                <label className="inline-flex items-center gap-2 text-gray-800"><input type="checkbox" className="accent-black" /> Content Creation</label>
-                <label className="inline-flex items-center gap-2 text-gray-800"><input type="checkbox" className="accent-black" /> UX Design</label>
-                <label className="inline-flex items-center gap-2 text-gray-800"><input type="checkbox" className="accent-black" /> Strategy & Consulting</label>
-                <label className="inline-flex items-center gap-2 text-gray-800"><input type="checkbox" className="accent-black" /> User Research</label>
-                <label className="inline-flex items-center gap-2 text-gray-800"><input type="checkbox" className="accent-black" /> Other</label>
-              </div>
-            </div>
+            <label className="block">
+              <span className="text-sm font-medium">Message</span>
+              <textarea
+                placeholder="Write your message here..."
+                className="mt-2 w-full rounded-xl border border-gray-300 p-3 min-h-32 resize-y focus:outline-none focus:ring-2 focus:ring-black/20"
+              />
+            </label>
 
             <button type="submit" className="w-full bg-black text-white px-6 py-3 rounded-xl hover:bg-black/90 transition">
               Send Message

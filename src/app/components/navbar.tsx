@@ -5,13 +5,16 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { NAV_LOGO_URL } from '../../lib/assets';
 import { useCart } from '../context/CartContext';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const { count } = useCart();
   const pathname = usePathname();
+  const router = useRouter();
+  const [query, setQuery] = useState('');
+  const [cartBump, setCartBump] = useState(false)
 
   // Handle scroll event to add/remove the scrolled class
   useEffect(() => {
@@ -37,6 +40,14 @@ export default function Navbar() {
     setIsOpen(false);
   }, [pathname]);
 
+  // Bump animation on cart count change
+  useEffect(() => {
+    if (typeof count !== 'number') return
+    setCartBump(true)
+    const id = window.setTimeout(() => setCartBump(false), 450)
+    return () => window.clearTimeout(id)
+  }, [count])
+
   return (
     <nav className={`transition-all duration-300 w-full sticky top-0 z-50 ${isScrolled ? 'bg-white bg-opacity-80 shadow-lg' : 'bg-transparent'} overflow-x-hidden animate-slide-down-fade anim-delay-200 will-change`}>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between py-3">
@@ -59,16 +70,36 @@ export default function Navbar() {
             <input
               type="text"
               placeholder="Search for a product"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && query.trim()) {
+                  router.push(`/products?q=${encodeURIComponent(query.trim())}`);
+                  setQuery('');
+                }
+              }}
               className="pl-10 pr-4 py-2 border rounded-md focus:ring focus:ring-red-200 w-72 sm:w-96"
             />
-            <Search className="absolute left-3 top-2.5 text-gray-500" size={16} />
+            <button
+              type="button"
+              aria-label="Search"
+              onClick={() => {
+                if (query.trim()) {
+                  router.push(`/products?q=${encodeURIComponent(query.trim())}`)
+                  setQuery('')
+                }
+              }}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+            >
+              <Search size={16} />
+            </button>
           </div>
 
           {/* Icons */}
           <div className="flex space-x-4 items-center">
             <User className="text-black cursor-pointer" />
             <Link href="/cart" className="relative">
-              <ShoppingBag className="text-black cursor-pointer" />
+              <ShoppingBag className={`text-black cursor-pointer ${cartBump ? 'cart-bump' : ''}`} />
               {count > 0 && (
                 <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full px-1 min-w-5 text-center">
                   {count}
@@ -107,16 +138,42 @@ export default function Navbar() {
           <Link href="/contactUs" className="text-black hover:text-red-600" onClick={() => setIsOpen(false)}>Contact Us</Link>
 
           {/* Search Bar */}
-          <div className="relative">
+          <div className="relative w-full">
             <input
               type="text"
               placeholder="Search for a product"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && query.trim()) {
+                  setIsOpen(false);
+                  router.push(`/products?q=${encodeURIComponent(query.trim())}`);
+                  setQuery('');
+                }
+              }}
               className="pl-10 pr-4 py-2 border rounded-md w-full focus:ring focus:ring-red-200"
             />
-            <Search className="absolute left-3 top-2.5 text-gray-500" size={16} />
+            <button
+              type="button"
+              aria-label="Search"
+              onClick={() => {
+                if (query.trim()) {
+                  setIsOpen(false)
+                  router.push(`/products?q=${encodeURIComponent(query.trim())}`)
+                  setQuery('')
+                }
+              }}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+            >
+              <Search size={16} />
+            </button>
           </div>
         </div>
       )}
+      <style jsx>{`
+        @keyframes cartBump { 0% { transform: scale(1); } 20% { transform: scale(1.1); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }
+        .cart-bump { animation: cartBump 450ms ease-out; }
+      `}</style>
     </nav>
 
   );

@@ -4,7 +4,7 @@ import textBanner from '../../../public/Static/Image/text2background.png';
 
 export default function VoltageEngineer() {
   const [highlighted, setHighlighted] = useState(false); // Track if highlight effect is applied
-  const [textColorWhite, setTextColorWhite] = useState(false); // Track if text color should be white
+  const [textColorWhite, setTextColorWhite] = useState(true); // Keep text white from start
   const fullText = 'is customer satisfaction!!';
   const [typedOnce, setTypedOnce] = useState(false);
   const [displayed, setDisplayed] = useState('');
@@ -20,13 +20,11 @@ export default function VoltageEngineer() {
         // Apply highlight effect and delay text color change
         if (!highlighted) {
           setHighlighted(true);
-          setTimeout(() => {
-            setTextColorWhite(true); // Change text color to white after highlight
-          }, 300); // Set delay for color change (1000ms = 1 second)
+          // text remains white consistently
         }
       } else {
         setHighlighted(false); // Reset if element is out of view
-        setTextColorWhite(false); // Reset text color if out of view
+        // Keep text white; do not toggle to black
       }
     };
 
@@ -63,7 +61,7 @@ export default function VoltageEngineer() {
       {/* Second text with background and highlighter effect */}
       <div
         id="highlightText"
-        className={`relative inline-block max-w-full text-[clamp(18px,3.4vw,38px)] leading-tight text-center px-5 sm:px-6 md:px-8 lg:px-10 py-2 md:py-3 whitespace-nowrap transition-all duration-500 ease-in-out ${
+        className={`relative inline-block max-w-full text-[clamp(18px,3.4vw,38px)] leading-tight text-center px-5 sm:px-6 md:px-8 lg:px-10 py-2 md:py-3 whitespace-nowrap transition-all duration-500 ease-in-out mt-3 md:mt-5 ${
           highlighted ? '' : ''
         } ${textColorWhite ? 'text-white' : 'text-black'}`}
         style={{ fontFamily: 'Arial, Helvetica, sans-serif' }}

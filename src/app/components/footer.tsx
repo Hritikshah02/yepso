@@ -110,11 +110,11 @@ export default function Footer() {
             <h3 className="hidden md:block font-bold text-lg mb-3">Follow Us</h3>
             {/* Follow Us icons - show md+ only */}
             <div className="hidden md:flex md:grid-cols-5 gap-4 text-lg md:text-xl">
-              <a href="#" className="text-blue-600 hover:text-blue-800"><i className="fa-brands fa-facebook"></i></a>
-              <a href="#" className="text-black hover:text-gray-800"><i className="fa-brands fa-x-twitter"></i></a>
-              <a href="#" className="text-pink-600 hover:text-pink-800"><i className="fa-brands fa-instagram"></i></a>
-              <a href="#" className="text-blue-500 hover:text-blue-700"><i className="fa-brands fa-linkedin"></i></a>
-              <a href="#" className="text-red-600 hover:text-red-800"><i className="fa-brands fa-youtube"></i></a>
+              <a href="https://www.facebook.com/share/1CVYfydQvN/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800" aria-label="Facebook"><i className="fa-brands fa-facebook"></i></a>
+              <a href="#" className="text-black hover:text-gray-800" aria-label="X / Twitter"><i className="fa-brands fa-x-twitter"></i></a>
+              <a href="https://www.instagram.com/exaltenergy?igsh=bXJ3NWFpb3k5Zzh5" target="_blank" rel="noopener noreferrer" className="text-pink-600 hover:text-pink-800" aria-label="Instagram"><i className="fa-brands fa-instagram"></i></a>
+              <a href="#" className="text-blue-500 hover:text-blue-700" aria-label="LinkedIn"><i className="fa-brands fa-linkedin"></i></a>
+              <a href="https://youtube.com/@exaltenergy2599?si=oZx7e5fcmwaeyrC8" target="_blank" rel="noopener noreferrer" className="text-red-600 hover:text-red-800" aria-label="YouTube"><i className="fa-brands fa-youtube"></i></a>
             </div>
           </div>
         </div>
@@ -126,11 +126,11 @@ export default function Footer() {
         <div className="container mx-auto">
           <h3 className="font-bold text-base sm:text-lg mb-3 text-black">Follow Us</h3>
           <div className="flex space-x-4 text-lg sm:text-xl">
-            <a href="#" className="text-blue-600 hover:text-blue-800"><i className="fa-brands fa-facebook"></i></a>
-            <a href="#" className="text-black hover:text-gray-800"><i className="fa-brands fa-x-twitter"></i></a>
-            <a href="#" className="text-pink-600 hover:text-pink-800"><i className="fa-brands fa-instagram"></i></a>
-            <a href="#" className="text-blue-500 hover:text-blue-700"><i className="fa-brands fa-linkedin"></i></a>
-            <a href="#" className="text-red-600 hover:text-red-800"><i className="fa-brands fa-youtube"></i></a>
+            <a href="https://www.facebook.com/share/1CVYfydQvN/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800" aria-label="Facebook"><i className="fa-brands fa-facebook"></i></a>
+            <a href="#" className="text-black hover:text-gray-800" aria-label="X / Twitter"><i className="fa-brands fa-x-twitter"></i></a>
+            <a href="https://www.instagram.com/exaltenergy?igsh=bXJ3NWFpb3k5Zzh5" target="_blank" rel="noopener noreferrer" className="text-pink-600 hover:text-pink-800" aria-label="Instagram"><i className="fa-brands fa-instagram"></i></a>
+            <a href="#" className="text-blue-500 hover:text-blue-700" aria-label="LinkedIn"><i className="fa-brands fa-linkedin"></i></a>
+            <a href="https://youtube.com/@exaltenergy2599?si=oZx7e5fcmwaeyrC8" target="_blank" rel="noopener noreferrer" className="text-red-600 hover:text-red-800" aria-label="YouTube"><i className="fa-brands fa-youtube"></i></a>
           </div>
         </div>
       </div>

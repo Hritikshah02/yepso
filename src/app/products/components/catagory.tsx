@@ -174,26 +174,29 @@ const Categories: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-8">
-        <div> {/* Solar cards in the catalog section*/}
-          <SolorBanner
-            image="https://res.cloudinary.com/dkxflu8nz/image/upload/v1757260144/HYBRID_inverter_3_in_1_trending_kbojos.jpg"
-            discountText="30% OFF ON STUFF"
-            title="Hybrid inverter"
-            buttonText="Shop Now"
-            href="/products/3-in-1-inverter"
-          />
+      {/* Promo banners temporarily disabled as requested */}
+      {false && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-8">
+          <div>
+            <SolorBanner
+              image="https://res.cloudinary.com/dkxflu8nz/image/upload/v1757260144/HYBRID_inverter_3_in_1_trending_kbojos.jpg"
+              discountText="30% OFF ON STUFF"
+              title="Hybrid inverter"
+              buttonText="Shop Now"
+              href="/products/3-in-1-inverter"
+            />
+          </div>
+          <div>
+            <SolorBanner
+              image="https://res.cloudinary.com/dkxflu8nz/image/upload/v1757260143/all_in_one_trending_product_kyhvag.jpg"
+              discountText="50% OFF ON STUFF"
+              title="All-in-One Lithium Battery"
+              buttonText="Shop Now"
+              href="/products/all-in-one-lithium-battery"
+            />
+          </div>
         </div>
-        <div>
-          <SolorBanner
-            image="https://res.cloudinary.com/dkxflu8nz/image/upload/v1757260143/all_in_one_trending_product_kyhvag.jpg"
-            discountText="50% OFF ON STUFF"
-            title="All-in-One Lithium Battery"
-            buttonText="Shop Now"
-            href="/products/all-in-one-lithium-battery"
-          />
-        </div>
-      </div>
+      )}
     </div>
   );
 };
