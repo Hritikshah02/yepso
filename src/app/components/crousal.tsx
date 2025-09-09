@@ -23,6 +23,9 @@ const Carousel: React.FC<CarouselProps> = ({
   spaceBetween = 20,
   objectFit = 'contain',
 }) => {
+  // If no images are provided, render nothing
+  if (!images || images.length === 0) return null;
+
   return (
     <div className="w-full mx-auto">
       <div className="relative w-full aspect-[16/9] md:aspect-[21/9] overflow-hidden bg-white">
