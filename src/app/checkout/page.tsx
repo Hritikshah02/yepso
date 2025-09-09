@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "../context/AuthContext";
 
 declare global {
   interface Window {
@@ -37,10 +39,33 @@ export default function CheckoutPage() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
+  const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
 
   useEffect(() => {
     if (sameAsShipping) setBilling(shipping);
   }, [sameAsShipping, shipping]);
+
+  // Require auth: if not logged in, send to login first, then return here
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push(`/signIn?next=${encodeURIComponent('/checkout')}`);
+    }
+  }, [authLoading, user, router]);
+
+  // Prefill from authenticated user once available (only if fields are empty)
+  useEffect(() => {
+    if (!user) return;
+    setShipping((prev) => {
+      const fullName = `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim();
+      return {
+        ...prev,
+        name: prev.name || fullName,
+        phone: prev.phone || (user.phone ?? ''),
+      };
+    });
+    setEmail((prev) => prev || (user.email ?? ""));
+  }, [user]);
 
   // --- India states and sample cities ---
   const IN_STATES = useMemo(
@@ -277,13 +302,14 @@ export default function CheckoutPage() {
             })()}
             {input("Postal Code", shipping.postalCode, (v) => setShipping({ ...shipping, postalCode: v }), "text", shippingErrors.postalCode)}
           </section>
-
           <section className="space-y-3">
-            <h2 className="font-medium">Billing Address</h2>
-            <label className="flex items-center gap-2 mb-2">
-              <input type="checkbox" checked={sameAsShipping} onChange={(e) => setSameAsShipping(e.target.checked)} />
-              <span>Same as shipping</span>
-            </label>
+            <div className="flex items-center justify-between">
+              <h2 className="font-medium">Billing Address</h2>
+              <label className="flex items-center gap-2">
+                <input type="checkbox" checked={sameAsShipping} onChange={(e) => setSameAsShipping(e.target.checked)} />
+                <span>Same as shipping</span>
+              </label>
+            </div>
             {!sameAsShipping && (
               <div className="space-y-3">
                 {input("Full Name", billing.name, (v) => setBilling({ ...billing, name: v }), "text", billingErrors.name)}
@@ -308,10 +334,12 @@ export default function CheckoutPage() {
               </div>
             )}
           </section>
-        </div>
 
-        <div className="mt-4">
-          {input("Email (login email)", email, setEmail, "email", emailError)}
+          {/* Contact Email aligned with left column */}
+          <section className="space-y-3">
+            <h2 className="font-medium">Contact</h2>
+            {input("Email (login email)", email, setEmail, "email", emailError)}
+          </section>
         </div>
         {error && <p className="text-red-600 mt-4">{error}</p>}
 

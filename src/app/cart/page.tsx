@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useCart } from '../context/CartContext'
+import { useAuth } from '../context/AuthContext'
  
 import { Trash2 } from 'lucide-react'
 
@@ -26,6 +27,7 @@ export default function CartPage() {
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
   const { refresh } = useCart()
+  const { user } = useAuth()
 
   useEffect(() => {
     const fetchCart = async () => {
@@ -130,7 +132,7 @@ export default function CartPage() {
               <aside className="bg-white rounded-lg p-4 h-fit">
                 <div className="flex justify-between mb-2"><span>Subtotal</span><span>Rs {total}</span></div>
                 <div className="text-sm text-gray-500 mb-4">Taxes and shipping calculated at checkout.</div>
-                <Link href="/checkout" className="block text-center w-full bg-black text-white py-2 rounded-lg">Proceed to Checkout</Link>
+                <Link href={user ? "/checkout" : `/signIn?next=${encodeURIComponent('/checkout')}`} className="block text-center w-full bg-black text-white py-2 rounded-lg">Proceed to Checkout</Link>
                 <Link href="/products" className="block text-center w-full mt-2 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">Add more items</Link>
                 <button className="w-full mt-2 text-red-600 py-2 border border-red-300 rounded-lg" onClick={clearCart}>Clear Cart</button>
               </aside>

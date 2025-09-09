@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
@@ -12,6 +12,8 @@ export default function Login() {
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const next = searchParams.get("next") || "";
   const { refresh } = useAuth();
   const { refresh: refreshCart } = useCart();
 
@@ -36,7 +38,8 @@ export default function Login() {
       const data = await res.json();
       await refresh();
       await refreshCart();
-      if (data?.user?.role === "admin") router.push("/admin");
+      if (next) router.push(next);
+      else if (data?.user?.role === "admin") router.push("/admin");
       else router.push("/");
     } catch (e: any) {
       setError(e?.message || "Login failed");
@@ -47,7 +50,7 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-gray-50">
-      <div className="max-w-md w-full bg-white p-6 rounded-lg shadow-md">
+      <div className="max-w-md w-full mx-auto p-6 rounded-xl shadow-xl bg-red-500/15 backdrop-blur-xl backdrop-saturate-150 border border-red-500/20 ring-1 ring-inset ring-red-500/30 transition-transform duration-200 hover:shadow-2xl hover:scale-[1.02] hover:-translate-y-0.5">
         <h2 className="text-center text-2xl font-bold text-gray-900 mb-6">Login</h2>
         <form className="space-y-4" onSubmit={handleSubmit}>
           <input
@@ -55,14 +58,14 @@ export default function Login() {
             placeholder="Phone or Email"
             value={identifier}
             onChange={(e) => setIdentifier(e.target.value)}
-            className="w-full p-3 border rounded-lg focus:ring-red-500 focus:border-red-500"
+            className="w-full p-3 border rounded-lg bg-white focus:ring-red-500 focus:border-red-500"
           />
           <input
             type="password"
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-3 border rounded-lg focus:ring-red-500 focus:border-red-500"
+            className="w-full p-3 border rounded-lg bg-white focus:ring-red-500 focus:border-red-500"
           />
           {error && <p className="text-red-600 text-sm">{error}</p>}
           <button
@@ -74,9 +77,9 @@ export default function Login() {
           </button>
         </form>
         <p className="text-sm text-gray-600 mt-4">
-          New here? <Link href="/signUp" className="text-red-600 underline">Create an account</Link>
+          New here? <Link href={`/signUp${next ? `?next=${encodeURIComponent(next)}` : ""}`} className="text-red-600 underline">Create an account</Link>
         </p>
-        <p className="text-xs text-gray-400 mt-2">Admin login: username "admin" and password "admin"</p>
+        {/* Admin login hint removed */}
       </div>
     </div>
   );

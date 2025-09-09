@@ -75,7 +75,7 @@ export default function SignUp() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-gray-50">
-      <div className="max-w-md w-full bg-white p-6 rounded-lg shadow-md">
+      <div className="max-w-md w-full mx-auto p-6 rounded-xl shadow-xl bg-white/30 backdrop-blur-xl backdrop-saturate-150 border border-white/20 ring-1 ring-inset ring-gray-200/40 transition-transform duration-200 hover:shadow-2xl hover:scale-[1.02] hover:-translate-y-0.5">
         <h2 className="text-center text-2xl font-bold text-gray-900 mb-6">Sign Up</h2>
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div className="space-y-3">
@@ -86,7 +86,7 @@ export default function SignUp() {
               placeholder="Full Name"
               value={formData.name}
               onChange={handleChange}
-              className="w-full p-3 border rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full p-3 border rounded-lg bg-white focus:ring-indigo-500 focus:border-indigo-500"
             />
             {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
 
@@ -97,7 +97,7 @@ export default function SignUp() {
               placeholder="Email Address"
               value={formData.email}
               onChange={handleChange}
-              className="w-full p-3 border rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full p-3 border rounded-lg bg-white focus:ring-indigo-500 focus:border-indigo-500"
             />
             {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
 
@@ -108,7 +108,7 @@ export default function SignUp() {
               placeholder="Password"
               value={formData.password}
               onChange={handleChange}
-              className="w-full p-3 border rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full p-3 border rounded-lg bg-white focus:ring-indigo-500 focus:border-indigo-500"
             />
             {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
 
@@ -119,7 +119,7 @@ export default function SignUp() {
               placeholder="Confirm Password"
               value={formData.confirmPassword}
               onChange={handleChange}
-              className="w-full p-3 border rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full p-3 border rounded-lg bg-white focus:ring-indigo-500 focus:border-indigo-500"
             />
             {errors.confirmPassword && <p className="text-red-500 text-sm">{errors.confirmPassword}</p>}
           </div>
