@@ -52,7 +52,7 @@ const Tabs: React.FC<{ tabs: TabKey[]; selectedTab: TabKey; onTabClick: (tab: Ta
 );
 
 // ProductCatalogue Component
-const ProductCatalogue: React.FC<{ tabs: TabKey[]; useDetailedCards?: boolean }> = ({ tabs, useDetailedCards = true }) => {
+const ProductCatalogue: React.FC<{ tabs: TabKey[]; useDetailedCards?: boolean; onLoaded?: () => void }> = ({ tabs, useDetailedCards = true, onLoaded }) => {
   const [selectedTab, setSelectedTab] = useState<TabKey>(tabs[0]); // Default to the first tab
   const [items, setItems] = useState<ApiProduct[] | null>(null)
   const [loading, setLoading] = useState(true)
@@ -61,6 +61,7 @@ const ProductCatalogue: React.FC<{ tabs: TabKey[]; useDetailedCards?: boolean }>
   const router = useRouter()
   const [searchLoading, setSearchLoading] = useState(false)
   const [searchInfo, setSearchInfo] = useState<{ query: string; suggestions: CardProduct[] } | null>(null)
+  const notifiedRef = (typeof window !== 'undefined') ? (window as any).__pc_notified ??= { v: false } : { v: false }
 
   useEffect(() => {
     let active = true
@@ -74,7 +75,13 @@ const ProductCatalogue: React.FC<{ tabs: TabKey[]; useDetailedCards?: boolean }>
       } catch (e: any) {
         if (active) setError(e?.message || 'Failed to load products')
       } finally {
-        if (active) setLoading(false)
+        if (active) {
+          setLoading(false)
+          if (!notifiedRef.v) {
+            notifiedRef.v = true
+            try { onLoaded?.() } catch {}
+          }
+        }
       }
     })()
     return () => { active = false }
@@ -290,10 +297,10 @@ const ProductCatalogue: React.FC<{ tabs: TabKey[]; useDetailedCards?: boolean }>
 // Tabs options
 const tabs: TabKey[] = ["latest", "popular", "reviewed"];
 
-export default function App() {
+export default function App({ onLoaded }: { onLoaded?: () => void }) {
   return (
     <div>
-         <ProductCatalogue tabs={tabs} useDetailedCards={true} />
+         <ProductCatalogue tabs={tabs} useDetailedCards={true} onLoaded={onLoaded} />
     </div>
   );
 }

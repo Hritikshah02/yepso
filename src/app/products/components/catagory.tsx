@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import type { StaticImageData } from "next/image";
@@ -77,9 +77,10 @@ const SolorBanner: React.FC<PromoBannerProps> = ({ image, discountText, title, b
 )
 ;
 
-const Categories: React.FC = () => {
+const Categories: React.FC<{ onLoaded?: () => void }> = ({ onLoaded }) => {
   const [list, setList] = useState<ApiProduct[] | null>(null)
   const [loading, setLoading] = useState(true)
+  const notifiedRef = useRef(false)
 
   useEffect(() => {
     let active = true
@@ -93,7 +94,13 @@ const Categories: React.FC = () => {
       } catch {
         if (active) setList([])
       } finally {
-        if (active) setLoading(false)
+        if (active) {
+          setLoading(false)
+          if (!notifiedRef.current) {
+            notifiedRef.current = true
+            try { onLoaded?.() } catch {}
+          }
+        }
       }
     })()
     return () => { active = false }
