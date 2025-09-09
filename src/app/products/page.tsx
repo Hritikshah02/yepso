@@ -1,14 +1,24 @@
 import Categories from './components/catagory'
 import ProductCatalogue from './components/product'
 import { Suspense } from 'react'
+import Carousel from '../components/crousal'
+import { PRODUCT_CAROUSEL_IMAGES } from '../../lib/assets'
 
 
 const ProductPage = () => {
   return (
     
     <div className='bg-[#F8F8F8]'>
-      {/* Placeholder space for future cover image/banner */}
-      <div className="w-full h-[120px] sm:h-[160px] md:h-[220px] lg:h-[260px]"></div>
+      {/* Products page cover slider */}
+      <div className="px-0">
+        <Carousel
+          images={PRODUCT_CAROUSEL_IMAGES}
+          autoplayDelay={5000}
+          slidesPerView={1}
+          spaceBetween={30}
+          objectFit="cover"
+        />
+      </div>
 
         <Categories/> {/* catagory */}
         {/* Wrap client component that uses useSearchParams in Suspense to satisfy Next.js */}
