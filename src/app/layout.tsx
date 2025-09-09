@@ -5,6 +5,7 @@ import '@fortawesome/fontawesome-free/css/all.min.css'  //fontawesome for icon
 import { CartProvider } from './context/CartContext'
 import { ToastProvider } from './context/ToastContext'
 import ImagePreload from './context/ImagePreload'
+import { AuthProvider } from './context/AuthContext'
 import PromoBanner from './components/prenavbar'
 import Navbar from './components/navbar'
 import Footer from './components/footer'
@@ -33,19 +34,21 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}>
-        <CartProvider>
-          <ToastProvider>
-            <ImagePreload />
-            <PromoBanner />
-            <Navbar />
-            <main className="flex-1">
-              <PageTransition>
-                {children}
-              </PageTransition>
-            </main>
-            <Footer />
-          </ToastProvider>
-        </CartProvider>
+        <AuthProvider>
+          <CartProvider>
+            <ToastProvider>
+              <ImagePreload />
+              <PromoBanner />
+              <Navbar />
+              <main className="flex-1">
+                <PageTransition>
+                  {children}
+                </PageTransition>
+              </main>
+              <Footer />
+            </ToastProvider>
+          </CartProvider>
+        </AuthProvider>
       </body>
     </html>
   );

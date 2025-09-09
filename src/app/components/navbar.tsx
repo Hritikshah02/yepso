@@ -1,20 +1,28 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Menu, X, Search, User, ShoppingBag } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { NAV_LOGO_URL } from '../../lib/assets';
 import { useCart } from '../context/CartContext';
 import { usePathname, useRouter } from 'next/navigation';
+import { useAuth } from '../context/AuthContext';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const { count } = useCart();
+  const { count, refresh: refreshCart } = useCart();
   const pathname = usePathname();
   const router = useRouter();
   const [query, setQuery] = useState('');
   const [cartBump, setCartBump] = useState(false)
+  const { user, loading, signOut, refresh: refreshAuth } = useAuth();
+  const [userMenuOpen, setUserMenuOpen] = useState(false)
+  // Trigger button ref (used to position portal menu)
+  const userMenuButtonRef = useRef<HTMLButtonElement>(null)
+  const userMenuPortalRef = useRef<HTMLDivElement>(null)
+  const [menuPos, setMenuPos] = useState<{ top: number; right: number }>({ top: 0, right: 0 })
 
   // Handle scroll event to add/remove the scrolled class
   useEffect(() => {
@@ -47,6 +55,43 @@ export default function Navbar() {
     const id = window.setTimeout(() => setCartBump(false), 450)
     return () => window.clearTimeout(id)
   }, [count])
+
+  // Compute portal menu position relative to trigger
+  useEffect(() => {
+    function update() {
+      const btn = userMenuButtonRef.current
+      if (!btn) return
+      const r = btn.getBoundingClientRect()
+      setMenuPos({ top: r.bottom + window.scrollY + 8, right: window.innerWidth - r.right })
+    }
+    if (userMenuOpen) {
+      update()
+      const onScroll = () => update()
+      const onResize = () => update()
+      window.addEventListener('scroll', onScroll, true)
+      window.addEventListener('resize', onResize)
+      return () => {
+        window.removeEventListener('scroll', onScroll, true)
+        window.removeEventListener('resize', onResize)
+      }
+    }
+  }, [userMenuOpen])
+
+  // Close on outside click (consider both trigger and portal menu)
+  useEffect(() => {
+    function onDocMouseDown(e: MouseEvent) {
+      const btn = userMenuButtonRef.current
+      const menu = userMenuPortalRef.current
+      const t = e.target as Node
+      if (btn && btn.contains(t)) return
+      if (menu && menu.contains(t)) return
+      setUserMenuOpen(false)
+    }
+    if (userMenuOpen) {
+      document.addEventListener('mousedown', onDocMouseDown)
+      return () => document.removeEventListener('mousedown', onDocMouseDown)
+    }
+  }, [userMenuOpen])
 
   return (
     <nav className={`transition-all duration-300 w-full sticky top-0 z-50 ${isScrolled ? 'bg-white bg-opacity-80 shadow-lg' : 'bg-transparent'} overflow-x-hidden animate-slide-down-fade anim-delay-200 will-change`}>
@@ -96,8 +141,41 @@ export default function Navbar() {
           </div>
 
           {/* Icons */}
-          <div className="flex space-x-4 items-center">
-            <User className="text-black cursor-pointer" />
+          <div className="flex space-x-4 items-center relative">
+            {/* User dropdown */}
+            <button
+              ref={userMenuButtonRef}
+              type="button"
+              className="flex items-center justify-center w-9 h-9 rounded-full bg-gray-200 text-gray-800 hover:bg-gray-300"
+              onClick={() => setUserMenuOpen(v => !v)}
+              aria-label="Account"
+            >
+              {user?.firstName ? (user.firstName[0] || 'U') : <User className="text-black" size={18} />}
+            </button>
+            {userMenuOpen && typeof window !== 'undefined' && createPortal(
+              <div
+                ref={userMenuPortalRef}
+                className="fixed z-[1000] bg-white rounded-md shadow-lg w-64 overflow-hidden border"
+                style={{ top: menuPos.top, right: menuPos.right }}
+              >
+                {user ? (
+                  <div className="flex flex-col">
+                    <div className="px-4 py-3 border-b">
+                      <div className="font-medium">{`${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() || 'User'}</div>
+                      {user.email ? <div className="text-sm text-gray-600 truncate">{user.email}</div> : null}
+                    </div>
+                    <Link href="/my-products" className="px-4 py-3 hover:bg-gray-100" onClick={() => setUserMenuOpen(false)}>My Products</Link>
+                    <button className="text-left px-4 py-3 hover:bg-gray-100" onClick={async () => { await signOut(); await refreshCart(); setUserMenuOpen(false); router.push('/signIn') }}>Sign out</button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col">
+                    <Link href="/signIn" className="px-4 py-3 hover:bg-gray-100" onClick={() => setUserMenuOpen(false)}>Sign In</Link>
+                    <Link href="/signUp" className="px-4 py-3 hover:bg-gray-100" onClick={() => setUserMenuOpen(false)}>Create Account</Link>
+                  </div>
+                )}
+              </div>,
+              document.body
+            )}
             <Link href="/cart" className="relative">
               <ShoppingBag className={`text-black cursor-pointer ${cartBump ? 'cart-bump' : ''}`} />
               {count > 0 && (

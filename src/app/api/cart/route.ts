@@ -5,6 +5,7 @@ import { randomUUID } from 'crypto'
 import { FALLBACK_PRODUCTS, ensureRuntimeProducts } from '../products/seed'
 
 const CART_COOKIE = 'cartId'
+const USER_COOKIE = 'userId'
 const CART_COOKIE_MAX_AGE_DAYS = 30
 
 function getCookieFromRequest(req: Request, name: string): string | undefined {
@@ -18,9 +19,24 @@ function getCookieFromRequest(req: Request, name: string): string | undefined {
 }
 
 function getOrCreateCartIdFromRequest(req: Request): { cartId: string; shouldSet: boolean } {
+  // If logged in, force cart id to user id so cart is unique per member
+  const userId = getCookieFromRequest(req, USER_COOKIE)
   const existing = getCookieFromRequest(req, CART_COOKIE)
+  if (userId) {
+    const shouldSet = existing !== userId
+    return { cartId: userId, shouldSet }
+  }
   if (existing) return { cartId: existing, shouldSet: false }
   return { cartId: randomUUID(), shouldSet: true }
+}
+
+function getCartIdFromRequest(req: Request): { cartId: string | undefined; shouldSet: boolean } {
+  const userId = getCookieFromRequest(req, USER_COOKIE)
+  const existing = getCookieFromRequest(req, CART_COOKIE)
+  if (userId) {
+    return { cartId: userId, shouldSet: existing !== userId }
+  }
+  return { cartId: existing, shouldSet: false }
 }
 
 // Runtime in-memory cart store: cartId -> (productId -> quantity)
@@ -47,7 +63,7 @@ async function getProductById(productId: number) {
 }
 
 export async function GET(req: Request) {
-  const cartId = getCookieFromRequest(req, CART_COOKIE)
+  const { cartId, shouldSet } = getCartIdFromRequest(req)
   if (!cartId) return NextResponse.json({ items: [], total: 0 })
 
   try {
@@ -64,7 +80,17 @@ export async function GET(req: Request) {
         const unit = Math.round(price * (1 - discount / 100))
         return sum + unit * item.quantity
       }, 0)
-      return NextResponse.json({ items, total })
+      const res = NextResponse.json({ items, total })
+      if (shouldSet) {
+        res.cookies.set(CART_COOKIE, cartId, {
+          httpOnly: true,
+          sameSite: 'lax',
+          secure: process.env.NODE_ENV === 'production',
+          path: '/',
+          maxAge: CART_COOKIE_MAX_AGE_DAYS * 24 * 60 * 60,
+        })
+      }
+      return res
     }
   } catch (_) {
     // fall back to runtime
@@ -93,7 +119,17 @@ export async function GET(req: Request) {
     const unit = Math.round(price * (1 - discount / 100))
     return sum + unit * it.quantity
   }, 0)
-  return NextResponse.json({ items, total })
+  const res = NextResponse.json({ items, total })
+  if (shouldSet) {
+    res.cookies.set(CART_COOKIE, cartId, {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      path: '/',
+      maxAge: CART_COOKIE_MAX_AGE_DAYS * 24 * 60 * 60,
+    })
+  }
+  return res
 }
 
 export async function POST(req: Request) {
@@ -147,7 +183,7 @@ export async function POST(req: Request) {
 }
 
 export async function PATCH(req: Request) {
-  const cartId = getCookieFromRequest(req, CART_COOKIE)
+  const { cartId, shouldSet } = getCartIdFromRequest(req)
   if (!cartId) return NextResponse.json({ error: 'No cart' }, { status: 400 })
   const body = await req.json()
   const { productId, quantity } = body ?? {}
@@ -159,27 +195,67 @@ export async function PATCH(req: Request) {
       where: { cartId_productId: { cartId, productId } },
       data: { quantity },
     })
-    return NextResponse.json(item)
+    const res = NextResponse.json(item)
+    if (shouldSet) {
+      res.cookies.set(CART_COOKIE, cartId, {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+        path: '/',
+        maxAge: CART_COOKIE_MAX_AGE_DAYS * 24 * 60 * 60,
+      })
+    }
+    return res
   } catch (_) {
     const map = getRuntimeCart(cartId)
     map[productId] = quantity
-    return NextResponse.json({ cartId, productId, quantity })
+    const res = NextResponse.json({ cartId, productId, quantity })
+    if (shouldSet) {
+      res.cookies.set(CART_COOKIE, cartId, {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+        path: '/',
+        maxAge: CART_COOKIE_MAX_AGE_DAYS * 24 * 60 * 60,
+      })
+    }
+    return res
   }
 }
 
 export async function DELETE(req: Request) {
-  const cartId = getCookieFromRequest(req, CART_COOKIE)
+  const { cartId, shouldSet } = getCartIdFromRequest(req)
   if (!cartId) return NextResponse.json({ ok: true })
   const { searchParams } = new URL(req.url)
   const productId = Number(searchParams.get('productId'))
   if (!productId) return NextResponse.json({ error: 'Invalid productId' }, { status: 400 })
   try {
     await prisma.cartItem.delete({ where: { cartId_productId: { cartId, productId } } })
-    return NextResponse.json({ ok: true })
+    const res = NextResponse.json({ ok: true })
+    if (shouldSet) {
+      res.cookies.set(CART_COOKIE, cartId, {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+        path: '/',
+        maxAge: CART_COOKIE_MAX_AGE_DAYS * 24 * 60 * 60,
+      })
+    }
+    return res
   } catch (_) {
     const map = getRuntimeCart(cartId)
     delete map[productId]
-    return NextResponse.json({ ok: true })
+    const res = NextResponse.json({ ok: true })
+    if (shouldSet) {
+      res.cookies.set(CART_COOKIE, cartId, {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+        path: '/',
+        maxAge: CART_COOKIE_MAX_AGE_DAYS * 24 * 60 * 60,
+      })
+    }
+    return res
   }
 }
 

@@ -2,67 +2,47 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useAuth } from "../context/AuthContext";
+import { useCart } from "../context/CartContext";
 
 export default function Login() {
-  const [formData, setFormData] = useState({
-    email: "",
-    username: "", // Added username field
-    password: "",
-  });
-
-  const [errors, setErrors] = useState<any>({});
+  const [identifier, setIdentifier] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
-
-  const validateForm = () => {
-    const newErrors: any = {};
-    if (!formData.email || !/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = "Valid email is required";
-    if (!formData.username) newErrors.username = "Username is required"; 
-    if (!formData.password) newErrors.password = "Password is required";
-    return newErrors;
-  };
+  const { refresh } = useAuth();
+  const { refresh: refreshCart } = useCart();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    const validationErrors = validateForm();
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-      setLoading(false);
+    setError("");
+    if (!identifier || !password) {
+      setError("Please enter phone/email and password");
       return;
     }
-
     try {
-      const response = await fetch("http://localhost:8000/api/token/", {
+      setLoading(true);
+      const res = await fetch("/api/auth/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData), 
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ identifier, password }),
       });
-
-      if (response.ok) {
-        const data = await response.json();
-        localStorage.setItem("access_token", data.access);
-        localStorage.setItem("refresh_token", data.refresh);
-        console.log("Login successful", data);
-        router.push("/"); // Redirect to dashboard after login
-      } else {
-        const errorData = await response.json();
-        setErrors({ submit: errorData.detail || "Invalid username, email, or password" });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data?.error || "Invalid credentials");
       }
-    } catch (error) {
-      setErrors({ submit: "Network error. Please try again later." });
+      const data = await res.json();
+      await refresh();
+      await refreshCart();
+      if (data?.user?.role === "admin") router.push("/admin");
+      else router.push("/");
+    } catch (e: any) {
+      setError(e?.message || "Login failed");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
@@ -70,51 +50,33 @@ export default function Login() {
       <div className="max-w-md w-full bg-white p-6 rounded-lg shadow-md">
         <h2 className="text-center text-2xl font-bold text-gray-900 mb-6">Login</h2>
         <form className="space-y-4" onSubmit={handleSubmit}>
-          <div className="space-y-3">
-            <input
-              id="email"
-              name="email"
-              type="email"
-              placeholder="Email Address"
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full p-3 border rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
-            />
-            {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
-
-            <input
-              id="username"
-              name="username" // New username field
-              type="text"
-              placeholder="Username"
-              value={formData.username}
-              onChange={handleChange}
-              className="w-full p-3 border rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
-            />
-            {errors.username && <p className="text-red-500 text-sm">{errors.username}</p>} {/* Display username error */}
-
-            <input
-              id="password"
-              name="password"
-              type="password"
-              placeholder="Password"
-              value={formData.password}
-              onChange={handleChange}
-              className="w-full p-3 border rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
-            />
-            {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
-          </div>
-
-          {errors.submit && <p className="text-red-500 text-sm">{errors.submit}</p>}
-
+          <input
+            type="text"
+            placeholder="Phone or Email"
+            value={identifier}
+            onChange={(e) => setIdentifier(e.target.value)}
+            className="w-full p-3 border rounded-lg focus:ring-red-500 focus:border-red-500"
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full p-3 border rounded-lg focus:ring-red-500 focus:border-red-500"
+          />
+          {error && <p className="text-red-600 text-sm">{error}</p>}
           <button
             type="submit"
-            className="w-full p-3 mt-4 text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+            className="w-full p-3 mt-2 text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-60"
             disabled={loading}
           >
             {loading ? "Logging in..." : "Login"}
           </button>
         </form>
+        <p className="text-sm text-gray-600 mt-4">
+          New here? <Link href="/signUp" className="text-red-600 underline">Create an account</Link>
+        </p>
+        <p className="text-xs text-gray-400 mt-2">Admin login: username "admin" and password "admin"</p>
       </div>
     </div>
   );

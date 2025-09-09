@@ -1,54 +1,70 @@
 'use client';
-import React from 'react';
-import Image from 'next/image';
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
-export default function ContactUs() {
+export default function SignUpPage() {
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    if (!firstName || !lastName || !email || !phone || !password || !confirmPassword) {
+      setError('Please fill all fields');
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+    try {
+      setLoading(true);
+      const res = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ firstName, lastName, email, phone, password, confirmPassword }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data?.error || 'Signup failed');
+      }
+      router.push('/signIn');
+    } catch (e: any) {
+      setError(e?.message || 'Signup failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="flex flex-col md:flex-row items-center justify-center w-full p-6 md:p-12 gap-8">
-      {/* Contact Form Section */}
-      <div className="md:w-1/2 p-6 bg-white rounded-lg shadow-lg">
-        <h2 className="text-3xl font-bold mb-4">Contact Us</h2>
-        <p className="text-black font-normal text-[20px]  flex items-center" style={{ fontFamily: 'Cabinet Grotesk' }}>
-          Our first priority is customer <br />satisfaction! You can contact us at any point of time!
-        </p>
-        <div className="mb-4">
-          <p className="flex items-center gap-2 text-green-600 font-medium">
-            💬 Chat with us on Whatsapp
-          </p>
-          <p className="flex items-center gap-2 text-gray-700 font-medium">
-            📧 Drop us a mail!
-          </p>
-          <p className="flex items-center gap-2 text-gray-700 font-medium">
-            📞 Contact us on our Toll free number
-          </p>
-        </div>
-        <form className="space-y-4">
-          <div className="flex gap-4">
-            <input type="text" placeholder="First Name" className="border p-2 w-1/2 rounded" />
-            <input type="text" placeholder="Last Name" className="border p-2 w-1/2 rounded" />
+    <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-gray-50">
+      <div className="max-w-md w-full bg-white p-6 rounded-lg shadow-md">
+        <h2 className="text-center text-2xl font-bold text-gray-900 mb-6">Create your account</h2>
+        <form className="space-y-3" onSubmit={submit}>
+          <div className="flex gap-3">
+            <input className="border p-3 rounded w-1/2" placeholder="First Name" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+            <input className="border p-3 rounded w-1/2" placeholder="Last Name" value={lastName} onChange={(e) => setLastName(e.target.value)} />
           </div>
-          <input type="email" placeholder="Email" className="border p-2 w-full rounded" />
-          <input type="email" placeholder="Confirm Email" className="border p-2 w-full rounded" />
-          <div className="grid grid-cols-2 gap-2 text-sm text-gray-700">
-            <label><input type="checkbox" className="mr-2" /> Website design</label>
-            <label><input type="checkbox" className="mr-2" /> Content creation</label>
-            <label><input type="checkbox" className="mr-2" /> UX design</label>
-            <label><input type="checkbox" className="mr-2" /> Strategy & consulting</label>
-            <label><input type="checkbox" className="mr-2" /> User research</label>
-            <label><input type="checkbox" className="mr-2" /> Other</label>
-          </div>
-          <button type="submit" className="bg-black text-white px-4 py-2 rounded">Send Message</button>
+          <input className="border p-3 rounded w-full" placeholder="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+          <input className="border p-3 rounded w-full" placeholder="Phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
+          <input className="border p-3 rounded w-full" placeholder="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+          <input className="border p-3 rounded w-full" placeholder="Confirm Password" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+          {error && <p className="text-red-600 text-sm">{error}</p>}
+          <button type="submit" className="w-full p-3 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-60" disabled={loading}>
+            {loading ? 'Creating account...' : 'Sign Up'}
+          </button>
         </form>
-      </div>
-
-      {/* Google Maps Section */}
-      <div className="md:w-1/2 flex justify-center items-center bg-white rounded-lg shadow-lg p-6">
-        <iframe
-          className="w-full h-80 rounded-lg"
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3650.063821223446!2d77.3718896751855!3d23.25993388484667!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x397c426b070b1e3b%3A0x1c3c6d2622d1b81!2sYepso!5e0!3m2!1sen!2sin!4v1649251492573!5m2!1sen!2sin"
-          allowFullScreen
-          loading="lazy"
-        ></iframe>
+        <p className="text-sm text-gray-600 mt-4">
+          Already have an account? <Link href="/signIn" className="text-red-600 underline">Sign in</Link>
+        </p>
       </div>
     </div>
   );
