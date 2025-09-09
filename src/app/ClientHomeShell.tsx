@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Carousel from "./components/crousal";
+import dynamic from "next/dynamic";
+const Carousel = dynamic(() => import("./components/crousal"), { ssr: false });
 import VoltageEngineer from "./components/section2";
 import AboutYepso from "./components/about";
 import Cards from "./components/Card_copy";
@@ -12,9 +13,27 @@ export default function ClientHomeShell() {
   const [show, setShow] = useState(false);
   const mountStartRef = useRef<number>(Date.now());
 
+  // Ensure we start at the top on navigation
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'auto' });
+    }
+  }, []);
+
+  // Derive filtered images at runtime as a safeguard during dev HMR
+  const filteredImages = (() => {
+    const tokens = (process.env.NEXT_PUBLIC_HOME_CAROUSEL_EXCLUDE || "")
+      .toLowerCase()
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+    if (!tokens.length) return HOME_CAROUSEL_IMAGES;
+    return HOME_CAROUSEL_IMAGES.filter((u) => !tokens.some((t) => u.toLowerCase().includes(t)));
+  })();
+
   // Preload first hero image to avoid revealing before it's ready
   useEffect(() => {
-    const first = HOME_CAROUSEL_IMAGES?.[0];
+    const first = filteredImages?.[0];
     if (!first) { setHeroLoaded(true); return; }
     const img = new Image();
     const done = () => setHeroLoaded(true);
@@ -38,13 +57,21 @@ export default function ClientHomeShell() {
     <div className="bg-white min-h-screen relative">
       {/* Hero carousel */}
       <div>
-        <Carousel
-          images={HOME_CAROUSEL_IMAGES}
-          autoplayDelay={5000}
-          slidesPerView={1}
-          spaceBetween={30}
-          objectFit="fill"
-        />
+        {show ? (
+          <Carousel
+            images={filteredImages}
+            autoplayDelay={5000}
+            slidesPerView={1}
+            spaceBetween={30}
+            objectFit="fill"
+          />
+        ) : (
+          <div className="relative w-full aspect-[16/9] md:aspect-[21/9] bg-white">
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="h-10 w-10 rounded-full border-2 border-gray-300 border-t-red-600 animate-spin" />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Page content */}
@@ -77,15 +104,7 @@ export default function ClientHomeShell() {
         </section>
       </div>
 
-      {/* Fullscreen clean loader overlay */}
-      {!show && (
-        <div className="fixed inset-0 z-[1100] bg-white/95 backdrop-blur-sm flex items-center justify-center">
-          <div className="flex flex-col items-center gap-3">
-            <div className="h-10 w-10 rounded-full border-2 border-gray-300 border-t-red-600 animate-spin" />
-            <div className="text-sm text-gray-600">Loading…</div>
-          </div>
-        </div>
-      )}
+      {/* Loader confined to hero above; no full-screen overlay */}
     </div>
   );
 }

@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import ProductCardDetailed from "./productcarddetailed"; // Import the reusable component
  import ProductCardCatalog from "./productcard";
 import { useSearchParams, useRouter } from 'next/navigation'
@@ -61,7 +61,8 @@ const ProductCatalogue: React.FC<{ tabs: TabKey[]; useDetailedCards?: boolean; o
   const router = useRouter()
   const [searchLoading, setSearchLoading] = useState(false)
   const [searchInfo, setSearchInfo] = useState<{ query: string; suggestions: CardProduct[] } | null>(null)
-  const notifiedRef = (typeof window !== 'undefined') ? (window as any).__pc_notified ??= { v: false } : { v: false }
+  // Fire onLoaded once per mount after initial fetch completes
+  const notifiedRef = useRef(false)
 
   useEffect(() => {
     let active = true
@@ -77,8 +78,8 @@ const ProductCatalogue: React.FC<{ tabs: TabKey[]; useDetailedCards?: boolean; o
       } finally {
         if (active) {
           setLoading(false)
-          if (!notifiedRef.v) {
-            notifiedRef.v = true
+          if (!notifiedRef.current) {
+            notifiedRef.current = true
             try { onLoaded?.() } catch {}
           }
         }
