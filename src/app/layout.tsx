@@ -6,7 +6,6 @@ import { CartProvider } from './context/CartContext'
 import { ToastProvider } from './context/ToastContext'
 import ImagePreload from './context/ImagePreload'
 import { AuthProvider } from './context/AuthContext'
-import PromoBanner from './components/prenavbar'
 import Navbar from './components/navbar'
 import Footer from './components/footer'
 import PageTransition from './components/PageTransition'
@@ -38,7 +37,6 @@ export default function RootLayout({
           <CartProvider>
             <ToastProvider>
               <ImagePreload />
-              <PromoBanner />
               <Navbar />
               <main className="flex-1">
                 <PageTransition>
