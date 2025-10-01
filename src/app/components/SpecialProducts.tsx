@@ -98,12 +98,12 @@ export default function SpecialProducts() {
           </div>
           
           {/* Image Placeholder - Right Side */}
-          <div className="relative w-full h-64 bg-gray-100 rounded-xl overflow-hidden">
+          <div className="relative w-full h-64 bg-gray-100 rounded-xl overflow-hidden flex items-center justify-center">
             <Image
-              src="https://res.cloudinary.com/dkxflu8nz/image/upload/v1757250300/cover2_l4csri.jpg"
+              src="https://res.cloudinary.com/dkxflu8nz/image/upload/v1759320097/IMG_2524_n9p9ed.png"
               alt="BLDC Ceiling Fans"
               fill
-              className="object-cover rounded-xl"
+              className="object-inherit"
               sizes="(max-width: 768px) 100vw, 50vw"
             />
           </div>
