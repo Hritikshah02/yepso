@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 const Carousel = dynamic(() => import("./components/crousal"), { ssr: false });
 import VoltageEngineer from "./components/section2";
 import AboutYepso from "./components/about";
-import Cards from "./components/Card_copy";
+import SpecialProducts from "./components/SpecialProducts";
 import { HOME_CAROUSEL_IMAGES, HOME_PROMO_IMAGE_URL } from "../lib/assets";
 
 export default function ClientHomeShell() {
@@ -77,7 +77,7 @@ export default function ClientHomeShell() {
       {/* Page content */}
       <div className={show ? "opacity-100" : "opacity-0"}>
         <VoltageEngineer />
-        <Cards />
+        <SpecialProducts />
         <AboutYepso />
         {/* Bottom promo photo (render only if configured) */}
         {HOME_PROMO_IMAGE_URL ? (

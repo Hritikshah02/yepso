@@ -6,27 +6,27 @@ export default function AboutYepso() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 w-full px-4 sm:px-8 md:px-16 lg:px-24 pt-12 pb-4 sm:pb-6 gap-8">
       {/* About Us Card */}
-      <div className="relative bg-white shadow-lg rounded-2xl p-8 h-full min-h-[413px] flex flex-col justify-between transition-transform duration-300 ease-out will-change-transform hover:scale-[1.02] hover:shadow-2xl hover:-translate-y-0.5 motion-reduce:transform-none cursor-pointer">
+      <div className="relative bg-white shadow-lg rounded-2xl p-8 h-full min-h-[413px] flex flex-col transition-transform duration-300 ease-out will-change-transform hover:scale-[1.02] hover:shadow-2xl hover:-translate-y-0.5 motion-reduce:transform-none cursor-pointer">
         {/* Title */}
         <h2 className="text-3xl sm:text-4xl font-medium text-black text-left mb-4">
           About Yepso
         </h2>
 
         {/* Description */}
-        <p className="text-base sm:text-lg text-black leading-7 flex-1 mb-4">
-          Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece
-          of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, 
-          a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure 
-          Latin words, consectetur, from a Lorem Ipsum passage.
+        <p className="text-base sm:text-lg text-black leading-7">
+        The Company has started its journey in 2015, with the vision
+of making smart energy saving products. With that aspect R&D facility
+was established in the year 2015.
+In its endeavour to reach every corner of the country Yepsois
+equipped with the vast network of Distributors, Direct
+Dealers and Retailers. Now, Yepso has established
+as a strong Brand in the Indian electrical and
+electronic goods market.
+After a long research company has developed
+Lithium lon Battery Pack, wide range of inverters,
+Smart Hybrid Voltage Stabilizers, Solar Services.
+We have number of models for Schools, Hospitals,Petrol Pumps and Offices.
         </p>
-
-        {/* Read More Link */}
-        <div className="flex items-center gap-2 group cursor-pointer">
-          <a href="#" className="text-lg font-medium text-black group-hover:text-gray-700">
-            Read More About our Journey
-          </a>
-          <span className="w-6 sm:w-10 text-black transition-transform transform group-hover:scale-x-125">→</span>
-        </div>
       </div>
 
       {/* Image Section (single Cloudinary-configurable image) */}
