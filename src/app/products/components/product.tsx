@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import ProductCardDetailed from "./productcarddetailed"; // Import the reusable component
  import ProductCardCatalog from "./productcard";
 import { useSearchParams, useRouter } from 'next/navigation'
- type TabKey = "latest" | "popular" | "reviewed";
+ type TabKey = "inverter" | "stabilizer" | "battery";
 
  type ApiProduct = {
   id: number
@@ -31,9 +31,9 @@ import { useSearchParams, useRouter } from 'next/navigation'
  
 // Tabs Names (Custom Names)
 const tabNames: Record<TabKey, string> = {
-  latest: "Latest Products",
-  popular: "Most Popular",
-  reviewed: "Most Reviewed",
+  inverter: "Inverter",
+  stabilizer: "Voltage Stabilizer",
+  battery: "Battery",
 };
 
 // Tabs Component
@@ -123,17 +123,12 @@ const ProductCatalogue: React.FC<{ tabs: TabKey[]; useDetailedCards?: boolean; o
 
   const grouped = useMemo(() => {
     const list = items ?? []
-    const latest = [...list]
-      .sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt))
-      .map(toCard)
-    const popular = [...list]
-      .sort((a, b) => (b._count?.cartItems ?? 0) - (a._count?.cartItems ?? 0))
-      .map(toCard)
-    // Placeholder for Most Reviewed until real review counts exist
-    const reviewed = [...list]
-      .sort((a, b) => b.name.localeCompare(a.name))
-      .map(toCard)
-    return { latest, popular, reviewed }
+    const lname = (p: ApiProduct) => (p.name ?? '').toLowerCase()
+    const includeAny = (p: ApiProduct, needles: string[]) => needles.some(n => lname(p).includes(n))
+    const inverter = list.filter(p => includeAny(p, ['inverter', 'ups'])).map(toCard)
+    const stabilizer = list.filter(p => includeAny(p, ['stabilizer', 'voltage', 'mainline', 'washing', 'ac'])).map(toCard)
+    const battery = list.filter(p => includeAny(p, ['battery', 'lithium'])).map(toCard)
+    return { inverter, stabilizer, battery }
   }, [items])
 
   // After lists are prepared, if there's a search query (?q=), scroll to the matching product
@@ -164,7 +159,7 @@ const ProductCatalogue: React.FC<{ tabs: TabKey[]; useDetailedCards?: boolean; o
     }
 
     // Build unique list across all tabs
-    const allTabs = ['latest', 'popular', 'reviewed'] as TabKey[]
+    const allTabs = tabs as TabKey[]
     const seen = new Set<string>()
     const all: Array<{ tab: TabKey; product: CardProduct; score: number }> = []
     for (const tab of allTabs) {
@@ -296,7 +291,7 @@ const ProductCatalogue: React.FC<{ tabs: TabKey[]; useDetailedCards?: boolean; o
 // (Removed static sample data; now fetched from API)
 
 // Tabs options
-const tabs: TabKey[] = ["latest", "popular", "reviewed"];
+const tabs: TabKey[] = ["inverter", "stabilizer", "battery"];
 
 export default function App({ onLoaded }: { onLoaded?: () => void }) {
   return (

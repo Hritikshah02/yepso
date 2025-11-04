@@ -86,7 +86,7 @@ export default function SpecialProducts() {
 
       {/* BLDC Ceiling Fans Section */}
       <div className="mt-12 max-w-6xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-lg p-8 grid grid-cols-1 md:grid-cols-2 gap-8 items-center transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] cursor-pointer">
+        <div className="rounded-2xl shadow-lg p-8 grid grid-cols-1 md:grid-cols-2 gap-8 items-center transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] cursor-pointer bg-gradient-to-br from-rose-100 via-red-50 to-amber-50">
           {/* Text Content - Left Side */}
           <div>
             <h3 className="text-2xl md:text-3xl font-bold text-black mb-4">
@@ -97,8 +97,8 @@ export default function SpecialProducts() {
             </p>
           </div>
           
-          {/* Image Placeholder - Right Side */}
-          <div className="relative w-full h-64 bg-gray-100 rounded-xl overflow-hidden flex items-center justify-center">
+          {/* Image - Right Side with themed gradient background */}
+          <div className="relative w-full h-64 rounded-xl overflow-hidden flex items-center justify-center bg-white">
             <Image
               src="https://res.cloudinary.com/dkxflu8nz/image/upload/v1759320097/IMG_2524_n9p9ed.png"
               alt="BLDC Ceiling Fans"
@@ -106,6 +106,7 @@ export default function SpecialProducts() {
               className="object-inherit"
               sizes="(max-width: 768px) 100vw, 50vw"
             />
+            <div aria-hidden className="absolute inset-0 pointer-events-none bg-gradient-to-br from-red-100/45 via-rose-50/25 to-transparent" />
           </div>
         </div>
       </div>

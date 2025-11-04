@@ -19,10 +19,17 @@ export default function Navbar() {
   const [cartBump, setCartBump] = useState(false)
   const { user, loading, signOut, refresh: refreshAuth } = useAuth();
   const [userMenuOpen, setUserMenuOpen] = useState(false)
+  type ApiProduct = { id: number; slug: string; name: string }
+  const [prodMenuOpen, setProdMenuOpen] = useState(false)
+  const [products, setProducts] = useState<ApiProduct[] | null>(null)
   // Trigger button ref (used to position portal menu)
   const userMenuButtonRef = useRef<HTMLButtonElement>(null)
   const userMenuPortalRef = useRef<HTMLDivElement>(null)
   const [menuPos, setMenuPos] = useState<{ top: number; right: number }>({ top: 0, right: 0 })
+  // Products dropdown trigger (vertical menu attached to navbar)
+  const prodTriggerRef = useRef<HTMLDivElement>(null)
+  const prodPortalRef = useRef<HTMLDivElement>(null)
+  const [prodPos, setProdPos] = useState<{ top: number; left: number; width: number }>({ top: 0, left: 0, width: 560 })
 
   // Handle scroll event to add/remove the scrolled class
   useEffect(() => {
@@ -41,7 +48,46 @@ export default function Navbar() {
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
-  }, []);
+  }, [])
+
+  // Fetch products for dropdown
+  useEffect(() => {
+    let active = true
+    ;(async () => {
+      try {
+        const res = await fetch('/api/products', { cache: 'no-store' })
+        if (!res.ok) return
+        const data: ApiProduct[] = await res.json()
+        if (active) setProducts(data)
+      } catch {}
+    })()
+    return () => { active = false }
+  }, [])
+
+  // Compute portal position for Products dropdown
+  useEffect(() => {
+    function update() {
+      const trg = prodTriggerRef.current
+      if (!trg) return
+      const r = trg.getBoundingClientRect()
+      const desired = Math.min(420, Math.max(260, Math.floor(window.innerWidth * 0.28)))
+      const left = Math.max(8, Math.min(r.left, window.innerWidth - desired - 8))
+      const width = desired
+      const top = r.bottom // flush under navbar (viewport coords)
+      setProdPos({ top, left, width })
+    }
+    if (prodMenuOpen) {
+      update()
+      const onScroll = () => update()
+      const onResize = () => update()
+      window.addEventListener('scroll', onScroll, true)
+      window.addEventListener('resize', onResize)
+      return () => {
+        window.removeEventListener('scroll', onScroll, true)
+        window.removeEventListener('resize', onResize)
+      }
+    }
+  }, [prodMenuOpen])
 
   // Close mobile menu on route change
   useEffect(() => {
@@ -107,7 +153,40 @@ export default function Navbar() {
         {/* Centered Menu */}
         <div className="hidden md:flex justify-center flex-grow space-x-10 items-center whitespace-nowrap lg:gap-10">
           <Link href="/" className="text-black hover:text-red-600">Home</Link>
-          <Link href="/products" className="text-black hover:text-red-600">Products</Link>
+          <div
+            ref={prodTriggerRef}
+            className="relative"
+            onMouseEnter={() => setProdMenuOpen(true)}
+            onMouseLeave={() => setProdMenuOpen(false)}
+          >
+            <Link href="/products" className="text-black hover:text-red-600">Products</Link>
+          </div>
+          {prodMenuOpen && typeof window !== 'undefined' && createPortal(
+            <div
+              ref={prodPortalRef}
+              className="fixed z-[1000] max-h-[70vh] overflow-y-auto rounded-lg shadow-lg border border-gray-200 bg-gradient-to-b from-white/95 via-red-50/90 to-white/95 backdrop-blur"
+              style={{ top: prodPos.top, left: prodPos.left, width: prodPos.width }}
+              onMouseEnter={() => setProdMenuOpen(true)}
+              onMouseLeave={() => setProdMenuOpen(false)}
+            >
+              <div className="py-2 flex flex-col">
+                {(products ?? []).map(p => (
+                  <Link
+                    key={p.slug}
+                    href={`/products/${p.slug}`}
+                    className="block w-full px-4 py-2 hover:bg-red-50 hover:text-red-700 transition-colors border-b last:border-b-0"
+                    onClick={() => setProdMenuOpen(false)}
+                  >
+                    {p.name}
+                  </Link>
+                ))}
+                {!products && (
+                  <div className="px-4 py-2 text-gray-500">Loading...</div>
+                )}
+              </div>
+            </div>,
+            document.body
+          )}
           <Link href="/contactUs" className="text-black hover:text-red-600">Contact Us</Link>
 
           {/* Search Bar */}

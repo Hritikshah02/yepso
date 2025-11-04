@@ -30,7 +30,7 @@ const ProductCardDetailed = ({ image, hoverImage, discount, title, reviews, pric
         }
       }}
     >
-      <div className="relative bg-[#EDEDED] h-64 sm:h-72 md:h-80">
+      <div className="relative h-64 sm:h-72 md:h-80 bg-gradient-to-tr from-white via-red-50 to-white">
         {/* Main Image */}
         {image && (
           <Image
